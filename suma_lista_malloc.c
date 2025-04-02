@@ -7,7 +7,7 @@ int main(void)
     int n;
     double *vector;
     double suma;
-
+    printf("COMENTARIO PARA VER SI FUNCIONA EL GIT PUSH");
     // Pide el número de elementos a sumar
     printf("Nº de elementos:");
     scanf("%i", &n);

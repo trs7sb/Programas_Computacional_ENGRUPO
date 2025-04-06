@@ -65,7 +65,28 @@ void calcularAceleraciones(Planet planets[], double a[NUM_PLANETS][2]) {
         a[i][1] = fuerzas[i][1] / planets[i].mass;
     }
 }
+// Calcular las energías del sistema
+void calcularEnergias(Planet planets[], double *energiaCinetica, double *energiaPotencial) {
+    *energiaCinetica = 0;
+    *energiaPotencial = 0;
 
+    // Energía cinética
+    for (int i = 0; i < NUM_PLANETS; i++) {
+        double velocidad2 = planets[i].velocity[0] * planets[i].velocity[0] +
+                            planets[i].velocity[1] * planets[i].velocity[1];
+        *energiaCinetica += 0.5 * planets[i].mass * velocidad2;
+    }
+
+    // Energía potencial
+    for (int i = 0; i < NUM_PLANETS; i++) {
+        for (int j = i + 1; j < NUM_PLANETS; j++) {
+            double dx = planets[j].position[0] - planets[i].position[0];
+            double dy = planets[j].position[1] - planets[i].position[1];
+            double distancia = sqrt(dx * dx + dy * dy);
+            *energiaPotencial -= (G * planets[i].mass * planets[j].mass) / distancia;
+        }
+    }
+}
 // Actualizar posiciones y velocidades usando el método de Verlet
 void actualizarPlanetas(Planet planets[], double dt) {
     double a[NUM_PLANETS][2] = {0};
@@ -113,10 +134,26 @@ int main() {
     double dt = DAY; // Paso de tiempo (1 día)
     double tiempo_total = YEAR * DAY; // Simular un año
 
-    for (double t = 0; t < tiempo_total; t += dt) {
-        imprimirPosiciones(planets, t);
-        actualizarPlanetas(planets, dt);
+    FILE *archivo = fopen("energias.txt", "w");
+    if (!archivo) {
+        perror("Error al abrir el archivo");
+        return 1;
     }
 
+    for (double t = 0; t < tiempo_total; t += dt) {
+        actualizarPlanetas(planets, dt);
+
+        double energiaCinetica, energiaPotencial;
+        calcularEnergias(planets, &energiaCinetica, &energiaPotencial);
+        double energiaMecanica = energiaCinetica + energiaPotencial;
+
+        fprintf(archivo, "%.6e %.6e %.6e\n", energiaCinetica, energiaPotencial, energiaMecanica);
+
+        if ((int)(t / dt) % 30 == 0) { // Imprimir cada 30 días
+            imprimirPosiciones(planets, t);
+        }
+    }
+
+    fclose(archivo);
     return 0;
 }

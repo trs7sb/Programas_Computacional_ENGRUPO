@@ -58,6 +58,22 @@ void convertirUnidadesAU(Planet planets[]) {
     }
 }
 
+// Función para convertir de unidades normalizadas a unidades originales
+void convertirAUnidadesOriginales(Planet planets[]) {
+    for (int i = 0; i < NUM_PLANETS; i++) {
+        // Convertir masa de masas solares a kilogramos
+        planets[i].mass *= MASA_SOLAR;
+
+        // Convertir posición de UA a metros
+        planets[i].position[0] *= AU;
+        planets[i].position[1] *= AU;
+
+        // Convertir velocidad de UA/s a m/s
+        planets[i].velocity[0] *= AU;
+        planets[i].velocity[1] *= AU;
+    }
+}
+
 // Calcular la fuerza gravitacional entre dos planetas
 void calcularFuerza(Planet *a, Planet *b, double *fx, double *fy) {
     double dx = b->position[0] - a->position[0];
@@ -135,8 +151,8 @@ void actualizarPlanetas(Planet planets[], double dt) {
 
     for (int i = 0; i < NUM_PLANETS; i++) {
         // Actualizar velocidad
-        planets[i].velocity[0] += w[i][0] + 0.5 * a[i][0] * dt;
-        planets[i].velocity[1] += w[i][1] + 0.5 * a[i][1] * dt;
+        planets[i].velocity[0] = w[i][0] + 0.5 * a[i][0] * dt;
+        planets[i].velocity[1] = w[i][1] + 0.5 * a[i][1] * dt;
     }
 }
 
@@ -170,6 +186,9 @@ int main() {
     for (double t = 0; t < tiempo_total; t += dt) {
         actualizarPlanetas(planets, dt);
 
+        // Convertir a unidades originales antes de calcular las energías
+        convertirAUnidadesOriginales(planets);
+
         double energiaCinetica, energiaPotencial;
         calcularEnergias(planets, &energiaCinetica, &energiaPotencial);
         double energiaMecanica = energiaCinetica + energiaPotencial;
@@ -179,6 +198,10 @@ int main() {
         if ((int)(t / dt) % 30 == 0) { // Imprimir cada 30 días
             imprimirPosiciones(planets, t);
         }
+
+        // Volver a normalizar las unidades para continuar la simulación
+        normalizarMasa(planets);
+        convertirUnidadesAU(planets);
     }
 
     fclose(archivo);

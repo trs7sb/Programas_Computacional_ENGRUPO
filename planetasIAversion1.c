@@ -8,6 +8,7 @@
 #define DAY 86400     // Un día en segundos
 #define YEAR 365.25   // Un año en días
 #define NUM_PLANETS 8 // Número de planetas
+#define MASA_SOL 1.989e30 // Masa del Sol (kg)
 
 // Datos de los planetas (masas en kg, distancias iniciales en AU, velocidades iniciales en m/s)
 typedef struct {
@@ -21,10 +22,10 @@ typedef struct {
 void inicializarPlanetas(Planet planets[]) {
     // Datos simplificados: nombre, masa (kg), posición inicial (AU), velocidad inicial (m/s)
     Planet temp[NUM_PLANETS] = {
-        {"Mercurio", 3.3011e23, {0.39 * AU, 0}, {0, 47400}},
-        {"Venus", 4.8675e24, {0.72 * AU, 0}, {0, 35020}},
-        {"Tierra", 5.97237e24, {1.0 * AU, 0}, {0, 29780}},
-        {"Marte", 6.4171e23, {1.52 * AU, 0}, {0, 24070}},
+        {"Mercurio", 3.3011e23/MASA_SOL, {0.39 * AU, 0}, {0, 47400}},
+        {"Venus", 4.8675e24/MASA_SOL, {0.72 * AU, 0}, {0, 35020}},
+        {"Tierra", 5.97237e24/MASA_SOL, {1.0 * AU, 0}, {0, 29780}},
+        {"Marte", 6.4171e23/MASA_SOL, {1.52 * AU, 0}, {0, 24070}},
         {"Júpiter", 1.8982e27, {5.2 * AU, 0}, {0, 13070}},
         {"Saturno", 5.6834e26, {9.58 * AU, 0}, {0, 9680}},
         {"Urano", 8.6810e25, {19.22 * AU, 0}, {0, 6800}},

@@ -39,60 +39,96 @@ void calcularFuerza(Planet *a, Planet *b, double *fx, double *fy) {
     double dx = b->position[0] - a->position[0];
     double dy = b->position[1] - a->position[1];
     double distancia = sqrt(dx * dx + dy * dy);
+    double distancia_cubica = distancia*distancia*distancia; // Distancia al cubo
     double fuerza = (G * a->mass * b->mass) / (distancia * distancia);
-    *fx = fuerza * dx / distancia;
-    *fy = fuerza * dy / distancia;
+    *fx = fuerza * dx /distancia_cubica;
+    *fy = fuerza * dy / distancia_cubica;
 }
 
-// Actualizar posiciones y velocidades usando el método de Verlet
-void actualizarPlanetas(Planet planets[], double dt) {
-    double fuerzas[NUM_PLANETS][2] = {0};
 
-    // Calcular fuerzas gravitacionales entre todos los planetas
-    for (int i = 0; i < NUM_PLANETS; i++) {
-        for (int j = i + 1; j < NUM_PLANETS; j++) {
-            double fx, fy;
-            calcularFuerza(&planets[i], &planets[j], &fx, &fy);
-            fuerzas[i][0] += fx;
-            fuerzas[i][1] += fy;
-            fuerzas[j][0] -= fx;
-            fuerzas[j][1] -= fy;
+void calcularAceleraciones(Planet planets[], double a[NUM_PLANETS][2]) {
+        // Inicializar fuerzas
+    double fuerzas[NUM_PLANETS][2] = {0};
+        // Calcular fuerzas gravitacionales entre todos los planetas
+        for (int i = 0; i < NUM_PLANETS; i++) {
+            for (int j = i + 1; j < NUM_PLANETS; j++) {
+                double fx, fy;
+                calcularFuerza(&planets[i], &planets[j], &fx, &fy);
+                fuerzas[i][0] += fx;
+                fuerzas[i][1] += fy;
+                fuerzas[j][0] -= fx;
+                fuerzas[j][1] -= fy;
+            }
+        }
+        // Calcular aceleraciones
+        for (int i = 0; i < NUM_PLANETS; i++) {
+            a[i][0] = fuerzas[i][0] / planets[i].mass;
+            a[i][1] = fuerzas[i][1] / planets[i].mass;
         }
     }
 
+
+// Actualizar posiciones y velocidades usando el método de Verlet
+void actualizarPlanetas(Planet planets[], double dt) {
+    
+    double a[NUM_PLANETS][2] = {0};
+
+    calcularAceleraciones(planets, a);
+    
+    double w[NUM_PLANETS][2] = {0};
+
+    for (int i = 1; i < NUM_PLANETS; i++)
+        {
+            w[i][0] =  planets[i].velocity[0] + 0.5 * dt * a[i][0];
+            w[i][1] =  planets[i].velocity[1]  + 0.5 * dt * a[i][0];
+        }
+
     // Actualizar posiciones y velocidades
-    for (int i = 0; i < NUM_PLANETS; i++) {
+    for (int i = 0; i < NUM_PLANETS; i++) 
+        {
         // Actualizar posición
-        planets[i].position[0] += planets[i].velocity[0] * dt + 0.5 * fuerzas[i][0] / planets[i].mass * dt * dt;
-        planets[i].position[1] += planets[i].velocity[1] * dt + 0.5 * fuerzas[i][1] / planets[i].mass * dt * dt;
+        planets[i].position[0] += planets[i].velocity[0] * dt + 0.5 * a[i][0] * dt * dt;
+        planets[i].position[1] += planets[i].velocity[1] * dt + 0.5 * a[i][0] * dt * dt;
+        }
 
+    //Calcular la aceleración con las posiciones actualizadas
+     calcularAceleraciones(planets,a);
+
+    for (int i = 0; i < NUM_PLANETS; i++) 
+        {
         // Actualizar velocidad
-        planets[i].velocity[0] += (fuerzas[i][0] / planets[i].mass) * dt;
-        planets[i].velocity[1] += (fuerzas[i][1] / planets[i].mass) * dt;
-    }
-}
+        planets[i].velocity[0] += w[i][0] + 0.5*a[i][0] * dt;
+        planets[i].velocity[1] += w[i][1] + 0.5*a[i][1] * dt;
+         }
 
+    }
 // Imprimir las posiciones de los planetas
 void imprimirPosiciones(Planet planets[], double tiempo) {
     printf("Tiempo: %.2f días\n", tiempo / DAY);
-    for (int i = 0; i < NUM_PLANETS; i++) {
+
+    for (int i = 0; i < NUM_PLANETS; i++) 
+        {
         printf("%s: x = %.2e, y = %.2e\n", planets[i].name, planets[i].position[0], planets[i].position[1]);
-    }
+        }
     printf("\n");
 }
 
 int main() {
+
     Planet planets[NUM_PLANETS];
     inicializarPlanetas(planets);
 
     double dt = DAY; // Paso de tiempo (1 día)
     double tiempo_total = YEAR * DAY; // Simular un año
 
-    for (double t = 0; t < tiempo_total; t += dt) {
+    for (double t = 0; t < tiempo_total; t += dt) 
+    {
         actualizarPlanetas(planets, dt);
-        if ((int)(t / dt) % 30 == 0) { // Imprimir cada 30 días
+        if ((int)(t / dt) % 30 == 0) 
+            { 
+            // Imprimir cada 30 días
             imprimirPosiciones(planets, t);
-        }
+            }
     }
 
     return 0;

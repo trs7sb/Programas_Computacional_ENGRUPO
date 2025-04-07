@@ -197,6 +197,14 @@ void imprimirPosiciones(Planet planets[], double tiempo) {
     printf("\n"); //salto de línea
 }
 
+// Función para guardar las posiciones de los planetas en un archivo
+void guardarPosiciones(Planet planets[], double tiempo, FILE *archivo_posiciones) {
+    fprintf(archivo_posiciones, "# Tiempo: %.2f días\n", tiempo / DAY);
+    for (int i = 0; i < NUM_PLANETS; i++) {
+        fprintf(archivo_posiciones, "%.6e, %.6e\n", planets[i].position[0], planets[i].position[1]);
+    }
+    fprintf(archivo_posiciones, "\n"); // Línea en blanco para separar instantes de tiempo
+}
 int main() {
 
     Planet planets[NUM_PLANETS];
@@ -224,6 +232,13 @@ int main() {
         return 1;
     }
 
+    // Abrir archivo para guardar las posiciones
+    FILE *archivo_posiciones = fopen("posiciones_planetas.txt", "w");
+     if (!archivo_posiciones) {
+        perror("Error al abrir el archivo de posiciones");
+        return 1;
+    }
+
     //CON EL TIEMPO Y LAS CONDICIONES INICIALES RESCALADAS
     for (double t = 0; t < tiempo_total; t += dt) {
 
@@ -233,7 +248,7 @@ int main() {
         convertirAUnidadesOriginales(planets);
         // Deshacer el reescalado de las velocidades por el factor tiempo 
         deshacerReescaladoVelocidades(planets, factor_tiempo);
-
+        
         double energiaCinetica, energiaPotencial;
         //Devuelve la energía cinética y potencial del sistema en el tiempo t + dt  en (m, kg, s)
         calcularEnergias(planets, &energiaCinetica, &energiaPotencial);
@@ -241,6 +256,9 @@ int main() {
 
         //Guarda las energías en el archivo. El tiempo en días se tiene en cuenta en el código de python 
         fprintf(archivo, "%.6e %.6e %.6e\n", energiaCinetica, energiaPotencial, energiaMecanica);
+
+        // Guardar las posiciones de los planetas para cada tiempo.
+        guardarPosiciones(planets, t / factor_tiempo, archivo_posiciones);
 
         if ((int)(t / dt) % 30 == 0) { // Imprimir cada 30 días
             imprimirPosiciones(planets, t / factor_tiempo); // Tiempo en unidades originales
@@ -255,5 +273,6 @@ int main() {
     }
 
     fclose(archivo);
+    fclose(archivo_posiciones);
     return 0;
 }

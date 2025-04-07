@@ -10,20 +10,22 @@
 #define NUM_PLANETS 9 // Número de planetas (incluyendo el Sol)
 #define MASA_SOLAR 1.989e30 // Masa del Sol en kg
 
-// Datos de los planetas (masas en kg, distancias iniciales en AU, velocidades iniciales en m/s)
+// Datos de los planetas (masas en kg, distancias iniciales en m, velocidades iniciales en la dirección y en m/s)
+// typedef permite crear objetos de tipo struct sin tener que escribir la palabra struct cada vez 
 typedef struct {
-    char name[20];
+    char name[20]; // Nombre del planeta
     double mass;       // Masa del planeta
     double position[2]; // Posición (x, y) en m
     double velocity[2]; // Velocidad (vx, vy) en m/s
 
-} Planet;
+} Planet;       
 
 // Inicializar datos reales de los planetas
-void inicializarPlanetas(Planet planets[]) {
-    // Datos simplificados: nombre, masa (kg), posición inicial (AU), velocidad inicial (m/s)
+void inicializarPlanetas(Planet planets[]) { 
+    // Datos simplificados: nombre, masa (kg), posición inicial (m), velocidad inicial (m/s)
+    // temp es un array temporal de tipo Planet que se usa para inicializar el array planets
     Planet temp[NUM_PLANETS] = {
-        {"Sol", MASA_SOLAR, {0, 0}, {0, 0}}, // El Sol
+        {"Sol", MASA_SOLAR, {0, 0}, {0, 0}}, 
         {"Mercurio", 3.3011e23, {0.39 * AU, 0}, {0, 47400}},
         {"Venus", 4.8675e24, {0.72 * AU, 0}, {0, 35020}},
         {"Tierra", 5.97237e24, {1.0 * AU, 0}, {0, 29780}},
@@ -58,7 +60,7 @@ void convertirUnidadesAU(Planet planets[]) {
     }
 }
 
-// Función para convertir de unidades normalizadas a unidades originales
+// Función para convertir de unidades rescaladas a unidades originales
 void convertirAUnidadesOriginales(Planet planets[]) {
     for (int i = 0; i < NUM_PLANETS; i++) {
         // Convertir masa de masas solares a kilogramos
@@ -74,50 +76,76 @@ void convertirAUnidadesOriginales(Planet planets[]) {
     }
 }
 
+// Función para reescalar las velocidades según el factor de tiempo
+void reescalarVelocidades(Planet planets[], double factor_tiempo) {
+    for (int i = 0; i < NUM_PLANETS; i++) {
+        planets[i].velocity[0] /= factor_tiempo;
+        planets[i].velocity[1] /= factor_tiempo;
+    }
+}
+
+// Función para deshacer el reescalado de las velocidades
+void deshacerReescaladoVelocidades(Planet planets[], double factor_tiempo) {
+    for (int i = 0; i < NUM_PLANETS; i++) {
+        planets[i].velocity[0] *= factor_tiempo;
+        planets[i].velocity[1] *= factor_tiempo;
+    }
+}
+
 // Calcular la fuerza gravitacional entre dos planetas
 void calcularFuerza(Planet *a, Planet *b, double *fx, double *fy) {
     double dx = b->position[0] - a->position[0];
     double dy = b->position[1] - a->position[1];
     double distancia = sqrt(dx * dx + dy * dy);
-    double fuerza = (G * a->mass * b->mass) / (distancia * distancia);
-    *fx = fuerza * dx / distancia;
-    *fy = fuerza * dy / distancia;
+    double fuerza = (1*a->mass * b->mass) / (distancia * distancia); //G es la unidad debido al rescalamiento
+    *fx = fuerza * dx / distancia; //Componente x del vector fuerza 
+    *fy = fuerza * dy / distancia; //Componente y del vector fuerza
 }
+//b es un puntero de tipo Planet, apunta a una dirección de memoria de una variable de tipo Planet
+//-> es un operador de acceso a una propiedad del struct Planet equivalente a (*b).position[0]
+
 
 void calcularAceleraciones(Planet planets[], double a[NUM_PLANETS][2]) {
-    // Inicializar fuerzas
+
     double fuerzas[NUM_PLANETS][2] = {0};
     // Calcular fuerzas gravitacionales entre todos los planetas
     for (int i = 0; i < NUM_PLANETS; i++) {
+        //j=i+1
+        //Al calcular las fuerzas sobre el planeta i=3 no tengo que considerar la interacción con los planetas j=1,2 porque ya las he considerado en las interacciones anteriores con i=1,2
+        //Así evito calcular la fuerza entre los planetas i y j dos veces
+        //Tampoco considero la interacción del planeta i consigo mismo
         for (int j = i + 1; j < NUM_PLANETS; j++) {
             double fx, fy;
             calcularFuerza(&planets[i], &planets[j], &fx, &fy);
-            fuerzas[i][0] += fx;
+            fuerzas[i][0] += fx; //Fuerza de i sobre j en la dirección x
             fuerzas[i][1] += fy;
-            fuerzas[j][0] -= fx;
+            fuerzas[j][0] -= fx; // Fuerza de i sobre j es igual y opuesta a la fuerza de j sobre i
             fuerzas[j][1] -= fy;
         }
     }
-    // Calcular aceleraciones
+    // Calcular aceleraciones a partir de la suma de fuerzas
     for (int i = 0; i < NUM_PLANETS; i++) {
         a[i][0] = fuerzas[i][0] / planets[i].mass;
         a[i][1] = fuerzas[i][1] / planets[i].mass;
     }
 }
-// Calcular las energías del sistema
+
+// Calcular las energías del sistema (SIN RESCALAMIENTO)
+
 void calcularEnergias(Planet planets[], double *energiaCinetica, double *energiaPotencial) {
     *energiaCinetica = 0;
     *energiaPotencial = 0;
 
-    // Energía cinética
+    // Energía cinética del sistema
     for (int i = 0; i < NUM_PLANETS; i++) {
         double velocidad2 = planets[i].velocity[0] * planets[i].velocity[0] +
                             planets[i].velocity[1] * planets[i].velocity[1];
         *energiaCinetica += 0.5 * planets[i].mass * velocidad2;
     }
 
-    // Energía potencial
+    // Energía potencial del sistema
     for (int i = 0; i < NUM_PLANETS; i++) {
+        //j=i+1 evito calcular la energía potencial entre los planetas i y j dos veces
         for (int j = i + 1; j < NUM_PLANETS; j++) {
             double dx = planets[j].position[0] - planets[i].position[0];
             double dy = planets[j].position[1] - planets[i].position[1];
@@ -126,22 +154,25 @@ void calcularEnergias(Planet planets[], double *energiaCinetica, double *energia
         }
     }
 }
+
 // Actualizar posiciones y velocidades usando el método de Verlet
 void actualizarPlanetas(Planet planets[], double dt) {
     double a[NUM_PLANETS][2] = {0};
 
-    calcularAceleraciones(planets, a);
+    //Calcula las aceleraciones en el tiempo t a partir de las fuerzas con las posiciones en el tiempo t
+    calcularAceleraciones(planets, a); 
 
     double w[NUM_PLANETS][2] = {0};
+
+    //Almacena en un array w las velocidades y aceleraciones en el tiempo t 
 
     for (int i = 1; i < NUM_PLANETS; i++) {
         w[i][0] = planets[i].velocity[0] + 0.5 * dt * a[i][0];
         w[i][1] = planets[i].velocity[1] + 0.5 * dt * a[i][1];
     }
 
-    // Actualizar posiciones y velocidades
+    // Actualizar posiciones al tiempo t+dt
     for (int i = 0; i < NUM_PLANETS; i++) {
-        // Actualizar posición
         planets[i].position[0] += planets[i].velocity[0] * dt + 0.5 * a[i][0] * dt * dt;
         planets[i].position[1] += planets[i].velocity[1] * dt + 0.5 * a[i][1] * dt * dt;
     }
@@ -149,33 +180,43 @@ void actualizarPlanetas(Planet planets[], double dt) {
     // Calcular la aceleración con las posiciones actualizadas
     calcularAceleraciones(planets, a);
 
+    //Calcular las nuevas velocidades al tiempo t+dt a partir de las aceleraciones en el tiempo t+dt y el array w
     for (int i = 0; i < NUM_PLANETS; i++) {
-        // Actualizar velocidad
         planets[i].velocity[0] = w[i][0] + 0.5 * a[i][0] * dt;
         planets[i].velocity[1] = w[i][1] + 0.5 * a[i][1] * dt;
     }
 }
 
-// Imprimir las posiciones de los planetas
+// Imprimir las posiciones de los planetas en un instante de tiempo
 void imprimirPosiciones(Planet planets[], double tiempo) {
     printf("Tiempo: %.2f días\n", tiempo / DAY);
 
     for (int i = 0; i < NUM_PLANETS; i++) {
         printf("%s: x = %.2e, y = %.2e\n", planets[i].name, planets[i].position[0], planets[i].position[1]);
     }
-    printf("\n");
+    printf("\n"); //salto de línea
 }
 
 int main() {
+
     Planet planets[NUM_PLANETS];
     inicializarPlanetas(planets);
 
-    // Normalizar masas y convertir unidades
+    // Rescalar masas (a masa solar) y posiciones y velocidades a UA y UA/s
     normalizarMasa(planets);
     convertirUnidadesAU(planets);
 
-    double dt = DAY; // Paso de tiempo (1 día)
-    double tiempo_total = YEAR * DAY; // Simular un año
+    // Calcular el factor de reescalado del tiempo
+    double factor_tiempo = sqrt(G * MASA_SOLAR / pow(AU, 3));
+
+    // Reescalar las velocidades según el factor de tiempo
+    reescalarVelocidades(planets, factor_tiempo);
+
+    // Reescalar el tiempo
+    double dt = DAY * factor_tiempo; 
+    double tiempo_total = YEAR * DAY * factor_tiempo; 
+
+    //Con esos rescalamientos G=1
 
     FILE *archivo = fopen("energias.txt", "w");
     if (!archivo) {
@@ -183,25 +224,34 @@ int main() {
         return 1;
     }
 
+    //CON EL TIEMPO Y LAS CONDICIONES INICIALES RESCALADAS
     for (double t = 0; t < tiempo_total; t += dt) {
-        actualizarPlanetas(planets, dt);
 
+        //Calcular posiciones y velocidades en el tiempo t+dt
+        actualizarPlanetas(planets, dt);
         // Convertir a unidades originales antes de calcular las energías
         convertirAUnidadesOriginales(planets);
+        // Deshacer el reescalado de las velocidades por el factor tiempo 
+        deshacerReescaladoVelocidades(planets, factor_tiempo);
 
         double energiaCinetica, energiaPotencial;
+        //Devuelve la energía cinética y potencial del sistema en el tiempo t + dt  en (m, kg, s)
         calcularEnergias(planets, &energiaCinetica, &energiaPotencial);
         double energiaMecanica = energiaCinetica + energiaPotencial;
 
+        //Guarda las energías en el archivo. El tiempo en días se tiene en cuenta en el código de python 
         fprintf(archivo, "%.6e %.6e %.6e\n", energiaCinetica, energiaPotencial, energiaMecanica);
 
         if ((int)(t / dt) % 30 == 0) { // Imprimir cada 30 días
-            imprimirPosiciones(planets, t);
+            imprimirPosiciones(planets, t / factor_tiempo); // Tiempo en unidades originales
         }
 
         // Volver a normalizar las unidades para continuar la simulación
         normalizarMasa(planets);
         convertirUnidadesAU(planets);
+
+        // Reescalar las velocidades nuevamente para continuar la simulación
+        reescalarVelocidades(planets, factor_tiempo);
     }
 
     fclose(archivo);

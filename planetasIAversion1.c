@@ -7,7 +7,7 @@
 #define AU 1.496e11   // Unidad astronómica (m)
 #define DAY 86400     // Un día en segundos
 #define YEAR 365.25   // Un año en días
-#define NUM_PLANETS 9 // Número de planetas (incluyendo el Sol)
+#define NUM_PLANETS 10 // Número de planetas (incluyendo el Sol)
 #define MASA_SOLAR 1.989e30 // Masa del Sol en kg
 
 // Datos de los planetas (masas en kg, distancias iniciales en m, velocidades iniciales en la dirección y en m/s)
@@ -33,7 +33,8 @@ void inicializarPlanetas(Planet planets[]) {
         {"Júpiter", 1.8982e27, {5.2 * AU, 0}, {0, 13070}},
         {"Saturno", 5.6834e26, {9.58 * AU, 0}, {0, 9680}},
         {"Urano", 8.6810e25, {19.22 * AU, 0}, {0, 6800}},
-        {"Neptuno", 1.02413e26, {30.05 * AU, 0}, {0, 5430}}
+        {"Neptuno", 1.02413e26, {30.05 * AU, 0}, {0, 5430}},
+        {"Plutón", 1.30900e22, {39.48 * AU, 0}, {0, 4748}} // Datos de Plutón
     };
     for (int i = 0; i < NUM_PLANETS; i++) {
         planets[i] = temp[i];
@@ -155,6 +156,7 @@ void calcularEnergias(Planet planets[], double *energiaCinetica, double *energia
     }
 }
 
+
 // Actualizar posiciones y velocidades usando el método de Verlet
 void actualizarPlanetas(Planet planets[], double dt) {
     double a[NUM_PLANETS][2] = {0};
@@ -204,9 +206,24 @@ void guardarPosiciones(Planet planets[], FILE *archivo_posiciones) {
     }
     fprintf(archivo_posiciones, "\n"); // Línea en blanco para separar instantes de tiempo
 }
+
+// Función para calcular los períodos de los planetas usando la Tercera Ley de Kepler
+void calcularPeriodosKepler(Planet planets[], double periodos[]) {
+    for (int i = 0; i < NUM_PLANETS; i++) {
+        // Calcular la distancia media al Sol (en UA)
+        double a = sqrt(planets[i].position[0] * planets[i].position[0] +
+                        planets[i].position[1] * planets[i].position[1]);
+
+        // Usar la Tercera Ley de Kepler: T^2 = a^3
+        periodos[i] = sqrt(a * a * a); // Período en años
+    }
+}
+
 int main() {
 
     Planet planets[NUM_PLANETS];
+
+
     inicializarPlanetas(planets);
 
     // Rescalar masas (a masa solar) y posiciones y velocidades a UA y UA/s
@@ -223,7 +240,22 @@ int main() {
     double dt = DAY * factor_tiempo; 
     double tiempo_total = YEAR * DAY * factor_tiempo; 
 
-    //Con esos rescalamientos G=1
+
+    // Crear un arreglo para almacenar los momentos angulares de cada planeta en cada paso de tiempo
+  
+   
+    // Crear un arreglo para almacenar los períodos
+    double periodos[NUM_PLANETS] = {0};
+
+    // Calcular los períodos de los planetas usando la Tercera Ley de Kepler
+    calcularPeriodosKepler(planets, periodos);
+
+    // Imprimir los períodos de los planetas
+    printf("Períodos de los planetas (en años):\n");
+    for (int i = 0; i < NUM_PLANETS; i++) {
+    printf("%s: %.2f años\n", planets[i].name, periodos[i]);
+    }
+
 
     FILE *archivo = fopen("energias.txt", "w");
     if (!archivo) {
@@ -237,6 +269,15 @@ int main() {
         perror("Error al abrir el archivo de posiciones");
         return 1;
     }
+    
+    // Abrir archivo para guardar los momentos angulares
+    FILE *archivo_momento = fopen("momento_angular.txt", "w");
+    if (!archivo_momento) {
+        perror("Error al abrir el archivo de momento angular");
+        return 1;
+    }
+
+
 
     //CON EL TIEMPO Y LAS CONDICIONES INICIALES RESCALADAS
     for (double t = 0; t < tiempo_total; t += dt) {
@@ -251,6 +292,7 @@ int main() {
         // Deshacer el reescalado de las velocidades por el factor tiempo 
         deshacerReescaladoVelocidades(planets, factor_tiempo);
         
+
         double energiaCinetica, energiaPotencial;
         //Devuelve la energía cinética y potencial del sistema en el tiempo t + dt  en (m, kg, s)
         calcularEnergias(planets, &energiaCinetica, &energiaPotencial);
@@ -258,6 +300,7 @@ int main() {
 
         //Guarda las energías en el archivo. El tiempo en días se tiene en cuenta en el código de python 
         fprintf(archivo, "%.6e %.6e %.6e\n", energiaCinetica, energiaPotencial, energiaMecanica);
+
 
         if ((int)(t / dt) % 30 == 0) { // Imprimir cada 30 días
             imprimirPosiciones(planets, t / factor_tiempo); // Tiempo en unidades originales
@@ -273,5 +316,6 @@ int main() {
 
     fclose(archivo);
     fclose(archivo_posiciones);
+    fclose(archivo_momento);
     return 0;
 }

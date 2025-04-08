@@ -198,8 +198,7 @@ void imprimirPosiciones(Planet planets[], double tiempo) {
 }
 
 // Función para guardar las posiciones de los planetas en un archivo
-void guardarPosiciones(Planet planets[], double tiempo, FILE *archivo_posiciones) {
-    fprintf(archivo_posiciones, "# Tiempo: %.2f días\n", tiempo / DAY);
+void guardarPosiciones(Planet planets[], FILE *archivo_posiciones) {
     for (int i = 0; i < NUM_PLANETS; i++) {
         fprintf(archivo_posiciones, "%.6e, %.6e\n", planets[i].position[0], planets[i].position[1]);
     }
@@ -258,7 +257,7 @@ int main() {
         fprintf(archivo, "%.6e %.6e %.6e\n", energiaCinetica, energiaPotencial, energiaMecanica);
 
         // Guardar las posiciones de los planetas para cada tiempo.
-        guardarPosiciones(planets, t / factor_tiempo, archivo_posiciones);
+        guardarPosiciones(planets, archivo_posiciones);
 
         if ((int)(t / dt) % 30 == 0) { // Imprimir cada 30 días
             imprimirPosiciones(planets, t / factor_tiempo); // Tiempo en unidades originales

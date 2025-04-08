@@ -221,11 +221,23 @@ void guardarPosiciones(Planet planets[], FILE *archivo_posiciones) {
     fprintf(archivo_posiciones, "\n"); // Línea en blanco para separar instantes de tiempo
 }
 
+// Función para calcular los períodos de los planetas usando la Tercera Ley de Kepler
+void calcularPeriodosKepler(Planet planets[], double periodos[]) {
+    for (int i = 0; i < NUM_PLANETS; i++) {
+        // Calcular la distancia media al Sol (en UA)
+        double a = sqrt(planets[i].position[0] * planets[i].position[0] +
+                        planets[i].position[1] * planets[i].position[1]);
 
+        // Usar la Tercera Ley de Kepler: T^2 = a^3
+        periodos[i] = sqrt(a * a * a); // Período en años
+    }
+}
 
 int main() {
 
     Planet planets[NUM_PLANETS];
+
+
     inicializarPlanetas(planets);
 
     // Rescalar masas (a masa solar) y posiciones y velocidades a UA y UA/s
@@ -241,8 +253,24 @@ int main() {
     // Reescalar el tiempo
     double dt = DAY * factor_tiempo; 
     double tiempo_total = YEAR * DAY * factor_tiempo; 
-
+    int num_steps = (int)(tiempo_total / dt);
     //Con esos rescalamientos G=1
+
+    // Crear un arreglo para almacenar los momentos angulares de cada planeta en cada paso de tiempo
+    double momentos_angulares[num_steps][NUM_PLANETS];
+   
+    // Crear un arreglo para almacenar los períodos
+    double periodos[NUM_PLANETS] = {0};
+
+    // Calcular los períodos de los planetas usando la Tercera Ley de Kepler
+    calcularPeriodosKepler(planets, periodos);
+
+    // Imprimir los períodos de los planetas
+    printf("Períodos de los planetas (en años):\n");
+    for (int i = 0; i < NUM_PLANETS; i++) {
+    printf("%s: %.2f años\n", planets[i].name, periodos[i]);
+    }
+
 
     FILE *archivo = fopen("energias.txt", "w");
     if (!archivo) {
@@ -264,8 +292,10 @@ int main() {
         return 1;
     }
 
+
+    int step = 0;
     //CON EL TIEMPO Y LAS CONDICIONES INICIALES RESCALADAS
-    for (double t = 0; t < tiempo_total; t += dt) {
+    for (double t = 0; t < tiempo_total; t += dt, step++) {
 
         //Calcular posiciones y velocidades en el tiempo t+dt
         actualizarPlanetas(planets, dt);
@@ -289,16 +319,20 @@ int main() {
 
 
         // Calcular el momento angular en módulo
-        double momentos_angulares[NUM_PLANETS];
-        calcularMomentoAngularModulo(planets, momentos_angulares);
+        double momentos_angulares_instante[NUM_PLANETS];
+        calcularMomentoAngularModulo(planets, momentos_angulares_instante);
 
-        // Guardar los momentos angulares en el archivo
+        // Guardar los momentos angulares en el arreglo
         for (int i = 0; i < NUM_PLANETS; i++) {
-            fprintf(archivo_momento, "%.6e ", momentos_angulares[i]);
+            momentos_angulares[step][i] = momentos_angulares_instante[i];
         }
-        fprintf(archivo_momento, "\n"); // Nueva línea para separar instantes de tiempo
-
-
+        // Escribir los momentos angulares en el archivo en formato de columnas
+        for (int i = 0; i < NUM_PLANETS; i++) { // Iterar sobre los planetas (columnas)
+        for (int j = 0; j < num_steps; j++) { // Iterar sobre los tiempos (filas)
+            fprintf(archivo_momento, "%.6e ", momentos_angulares[j][i]);
+        }
+        fprintf(archivo_momento, "\n"); // Nueva línea para separar columnas
+    }
 
 
         if ((int)(t / dt) % 30 == 0) { // Imprimir cada 30 días
@@ -315,5 +349,6 @@ int main() {
 
     fclose(archivo);
     fclose(archivo_posiciones);
+    fclose(archivo_momento);
     return 0;
 }

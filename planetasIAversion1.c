@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h> // Para usar malloc y free
+#include <stdbool.h>
+
 
 // Constantes físicas
 #define G 6.67430e-11 // Constante gravitacional (m^3 kg^-1 s^-2)
@@ -218,9 +220,33 @@ void calcularPeriodosKepler(Planet planets[], double periodos[]) {
         periodos[i] = sqrt(a * a * a); // Período en años
     }
 }
+ 
+double calcularMomentoAngularTotal(Planet planets[]) {
+    double momento_angular_total = 0.0;
+
+    for (int i = 0; i < NUM_PLANETS; i++) {
+        // Módulo de la posición
+        double r = sqrt(planets[i].position[0] * planets[i].position[0] +
+                        planets[i].position[1] * planets[i].position[1]);
+
+        // Módulo de la velocidad
+        double v = sqrt(planets[i].velocity[0] * planets[i].velocity[0] +
+                        planets[i].velocity[1] * planets[i].velocity[1]);
+
+        // Momento angular del planeta
+        double momento_angular = planets[i].mass * r * v;
+
+        // Sumar al momento angular total
+        momento_angular_total += momento_angular;
+    }
+
+    return momento_angular_total;
+}
+
 
 int main() {
 
+    int vueltas[NUM_PLANETS];
     Planet planets[NUM_PLANETS];
 
 
@@ -238,24 +264,7 @@ int main() {
 
     // Reescalar el tiempo
     double dt = DAY * factor_tiempo; 
-    double tiempo_total = YEAR * DAY * factor_tiempo; 
-
-
-    // Crear un arreglo para almacenar los momentos angulares de cada planeta en cada paso de tiempo
-  
-   
-    // Crear un arreglo para almacenar los períodos
-    double periodos[NUM_PLANETS] = {0};
-
-    // Calcular los períodos de los planetas usando la Tercera Ley de Kepler
-    calcularPeriodosKepler(planets, periodos);
-
-    // Imprimir los períodos de los planetas
-    printf("Períodos de los planetas (en años):\n");
-    for (int i = 0; i < NUM_PLANETS; i++) {
-    printf("%s: %.2f años\n", planets[i].name, periodos[i]);
-    }
-
+    double tiempo_total = 50*YEAR * DAY * factor_tiempo; 
 
     FILE *archivo = fopen("energias.txt", "w");
     if (!archivo) {
@@ -270,13 +279,22 @@ int main() {
         return 1;
     }
     
-    // Abrir archivo para guardar los momentos angulares
-    FILE *archivo_momento = fopen("momento_angular.txt", "w");
-    if (!archivo_momento) {
-        perror("Error al abrir el archivo de momento angular");
-        return 1;
+    // Abrir archivo para guardar el momento angular total
+    FILE *archivo_momento_total = fopen("momento_angular_total.txt", "w");
+    if (!archivo_momento_total) {
+    perror("Error al abrir el archivo de momento angular total");
+    return 1;
     }
 
+    //Inicializar el número de vueltas completas de cada planeta
+    for (int i = 0; i < NUM_PLANETS; i++) {
+        vueltas[i] = 0;
+    }
+
+    bool cruzo_eje[NUM_PLANETS]; // Indica si el planeta ha cruzado el eje y
+    for (int i = 0; i < NUM_PLANETS; i++) {
+        cruzo_eje[i] = false; // Inicialmente, ningún planeta ha cruzado el eje
+    }
 
 
     //CON EL TIEMPO Y LAS CONDICIONES INICIALES RESCALADAS
@@ -301,6 +319,9 @@ int main() {
         //Guarda las energías en el archivo. El tiempo en días se tiene en cuenta en el código de python 
         fprintf(archivo, "%.6e %.6e %.6e\n", energiaCinetica, energiaPotencial, energiaMecanica);
 
+        // Calcular el momento angular total y guardarlo en el archivo
+        double momento_angular_total = calcularMomentoAngularTotal(planets);
+         fprintf(archivo_momento_total, "%.6e\n", momento_angular_total);
 
         if ((int)(t / dt) % 30 == 0) { // Imprimir cada 30 días
             imprimirPosiciones(planets, t / factor_tiempo); // Tiempo en unidades originales
@@ -312,10 +333,40 @@ int main() {
 
         // Reescalar las velocidades nuevamente para continuar la simulación
         reescalarVelocidades(planets, factor_tiempo);
+
+        //Calcular el número de vueltas completas de cada planeta y guardarlo en un array
+        for (int i = 0; i < NUM_PLANETS; i++) {
+            // Detectar si el planeta cruza el eje x
+            if (planets[i].position[1] < 0 && !cruzo_eje[i]) {
+                cruzo_eje[i] = true; // Marca que el planeta ha cruzado el eje
+            } else if (planets[i].position[1] >= 0 && cruzo_eje[i]) {
+                // Si vuelve a cruzar hacia y > 0, cuenta una vuelta completa
+                vueltas[i]++;
+                cruzo_eje[i] = false; // Reinicia el estado para el próximo cruce
+            }
+        }
+
     }
+
+    // Imprimir el número de vueltas completas
+    printf("Número de vueltas completas de los planetas:\n");
+    for (int i = 0; i < NUM_PLANETS; i++) {
+        printf("%s: %d vueltas\n", planets[i].name, vueltas[i]);
+    }
+    
+    // Calcular e imprimir el período orbital de cada planeta
+    printf("\nPeríodos orbitales de los planetas.:\n");
+    for (int i = 0; i < NUM_PLANETS; i++) {
+     if (vueltas[i] > 0) {
+        double periodo = (50*YEAR) / vueltas[i]; // Tiempo total dividido por el número de vueltas
+        printf("%s: %.2f años\n", planets[i].name, periodo/YEAR); 
+    } else {
+        printf("%s: No completó ninguna vuelta.\n", planets[i].name);
+    }
+}
 
     fclose(archivo);
     fclose(archivo_posiciones);
-    fclose(archivo_momento);
+    fclose(archivo_momento_total);
     return 0;
 }

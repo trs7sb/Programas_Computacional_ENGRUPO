@@ -1,30 +1,25 @@
 import matplotlib.pyplot as plt
-import numpy as np
 
-# Nombre del archivo que contiene los datos
-archivo_momento = "momento_angular.txt"
+def graficar_momento_angular(fichero):
+    # Leer los valores del momento angular desde el fichero
+    with open(fichero, 'r') as archivo:
+        momento_angular = [float(line.strip()) for line in archivo]
 
-# Leer los datos del archivo
-with open(archivo_momento, "r") as file:
-    # Cada línea corresponde a un instante de tiempo
-    data = [list(map(float, line.split())) for line in file if line.strip()]
+    # Crear el eje de tiempo (un año con pasos de un día)
+    tiempo = [i for i in range(len(momento_angular))]  # Tiempo en días
 
-# Convertir los datos a un array de NumPy para facilitar el manejo
-data = np.array(data)
+    # Graficar el momento angular en función del tiempo
+    plt.figure(figsize=(10, 6))
+    plt.plot(tiempo, momento_angular, label="Momento Angular Total", color="blue")
+    plt.xlabel("Tiempo (días)")
+    plt.ylabel("Momento Angular Total (kg·m²/s)")
+    plt.title("Momento Angular Total en función del Tiempo")
+    plt.grid(True)
+    plt.legend()
+    plt.tight_layout()
 
-# Crear un eje temporal (número de líneas = número de días)
-tiempos = np.arange(data.shape[0])  # Días desde el inicio
+    # Mostrar la gráfica
+    plt.show()
 
-# Graficar el momento angular de cada planeta
-for i in range(data.shape[1]):  # Iterar sobre las columnas (planetas)
-    plt.plot(tiempos, data[:, i], label=f"Planeta {i+1}")
-
-# Configurar la gráfica
-plt.xlabel("Tiempo (días)")
-plt.ylabel("Momento Angular (L)")
-plt.title("Evolución del Momento Angular de los Planetas")
-plt.legend()
-plt.grid()
-
-# Mostrar la gráfica
-plt.show()
+# Llamar a la función con el fichero de datos
+graficar_momento_angular("momento_angular_total.txt")

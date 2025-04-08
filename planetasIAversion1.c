@@ -243,6 +243,9 @@ int main() {
 
         //Calcular posiciones y velocidades en el tiempo t+dt
         actualizarPlanetas(planets, dt);
+        // Guardar las posiciones de los planetas para cada tiempo.
+        guardarPosiciones(planets, archivo_posiciones);
+        
         // Convertir a unidades originales antes de calcular las energías
         convertirAUnidadesOriginales(planets);
         // Deshacer el reescalado de las velocidades por el factor tiempo 
@@ -255,9 +258,6 @@ int main() {
 
         //Guarda las energías en el archivo. El tiempo en días se tiene en cuenta en el código de python 
         fprintf(archivo, "%.6e %.6e %.6e\n", energiaCinetica, energiaPotencial, energiaMecanica);
-
-        // Guardar las posiciones de los planetas para cada tiempo.
-        guardarPosiciones(planets, archivo_posiciones);
 
         if ((int)(t / dt) % 30 == 0) { // Imprimir cada 30 días
             imprimirPosiciones(planets, t / factor_tiempo); // Tiempo en unidades originales

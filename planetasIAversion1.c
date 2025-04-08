@@ -7,7 +7,7 @@
 #define AU 1.496e11   // Unidad astronómica (m)
 #define DAY 86400     // Un día en segundos
 #define YEAR 365.25   // Un año en días
-#define NUM_PLANETS 9 // Número de planetas (incluyendo el Sol)
+#define NUM_PLANETS 10 // Número de planetas (incluyendo el Sol)
 #define MASA_SOLAR 1.989e30 // Masa del Sol en kg
 
 // Datos de los planetas (masas en kg, distancias iniciales en m, velocidades iniciales en la dirección y en m/s)
@@ -33,7 +33,8 @@ void inicializarPlanetas(Planet planets[]) {
         {"Júpiter", 1.8982e27, {5.2 * AU, 0}, {0, 13070}},
         {"Saturno", 5.6834e26, {9.58 * AU, 0}, {0, 9680}},
         {"Urano", 8.6810e25, {19.22 * AU, 0}, {0, 6800}},
-        {"Neptuno", 1.02413e26, {30.05 * AU, 0}, {0, 5430}}
+        {"Neptuno", 1.02413e26, {30.05 * AU, 0}, {0, 5430}},
+        {"Plutón", 1.30900e22, {39.48 * AU, 0}, {0, 4748}} // Datos de Plutón
     };
     for (int i = 0; i < NUM_PLANETS; i++) {
         planets[i] = temp[i];
@@ -130,6 +131,20 @@ void calcularAceleraciones(Planet planets[], double a[NUM_PLANETS][2]) {
     }
 }
 
+// Función para calcular el momento angular en módulo (SIN RESCALAMIENTO)
+void calcularMomentoAngularModulo(Planet planets[], double momentos_angulares[]) {
+    for (int i = 0; i < NUM_PLANETS; i++) {
+        // Calcular r (distancia al origen) y v (magnitud de la velocidad)
+        double r = sqrt(planets[i].position[0] * planets[i].position[0] +
+                        planets[i].position[1] * planets[i].position[1]);
+        double v = sqrt(planets[i].velocity[0] * planets[i].velocity[0] +
+                        planets[i].velocity[1] * planets[i].velocity[1]);
+
+        // Momento angular en módulo: L = m * r * v
+        momentos_angulares[i] = planets[i].mass * r * v;
+    }
+}
+
 // Calcular las energías del sistema (SIN RESCALAMIENTO)
 
 void calcularEnergias(Planet planets[], double *energiaCinetica, double *energiaPotencial) {
@@ -154,6 +169,7 @@ void calcularEnergias(Planet planets[], double *energiaCinetica, double *energia
         }
     }
 }
+
 
 // Actualizar posiciones y velocidades usando el método de Verlet
 void actualizarPlanetas(Planet planets[], double dt) {
@@ -204,6 +220,9 @@ void guardarPosiciones(Planet planets[], FILE *archivo_posiciones) {
     }
     fprintf(archivo_posiciones, "\n"); // Línea en blanco para separar instantes de tiempo
 }
+
+
+
 int main() {
 
     Planet planets[NUM_PLANETS];
@@ -237,6 +256,13 @@ int main() {
         perror("Error al abrir el archivo de posiciones");
         return 1;
     }
+    
+    // Abrir archivo para guardar los momentos angulares
+    FILE *archivo_momento = fopen("momento_angular.txt", "w");
+    if (!archivo_momento) {
+        perror("Error al abrir el archivo de momento angular");
+        return 1;
+    }
 
     //CON EL TIEMPO Y LAS CONDICIONES INICIALES RESCALADAS
     for (double t = 0; t < tiempo_total; t += dt) {
@@ -251,6 +277,7 @@ int main() {
         // Deshacer el reescalado de las velocidades por el factor tiempo 
         deshacerReescaladoVelocidades(planets, factor_tiempo);
         
+
         double energiaCinetica, energiaPotencial;
         //Devuelve la energía cinética y potencial del sistema en el tiempo t + dt  en (m, kg, s)
         calcularEnergias(planets, &energiaCinetica, &energiaPotencial);
@@ -258,6 +285,21 @@ int main() {
 
         //Guarda las energías en el archivo. El tiempo en días se tiene en cuenta en el código de python 
         fprintf(archivo, "%.6e %.6e %.6e\n", energiaCinetica, energiaPotencial, energiaMecanica);
+
+
+
+        // Calcular el momento angular en módulo
+        double momentos_angulares[NUM_PLANETS];
+        calcularMomentoAngularModulo(planets, momentos_angulares);
+
+        // Guardar los momentos angulares en el archivo
+        for (int i = 0; i < NUM_PLANETS; i++) {
+            fprintf(archivo_momento, "%.6e ", momentos_angulares[i]);
+        }
+        fprintf(archivo_momento, "\n"); // Nueva línea para separar instantes de tiempo
+
+
+
 
         if ((int)(t / dt) % 30 == 0) { // Imprimir cada 30 días
             imprimirPosiciones(planets, t / factor_tiempo); // Tiempo en unidades originales

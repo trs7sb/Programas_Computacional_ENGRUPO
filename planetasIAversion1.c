@@ -131,20 +131,6 @@ void calcularAceleraciones(Planet planets[], double a[NUM_PLANETS][2]) {
     }
 }
 
-// Función para calcular el momento angular en módulo (SIN RESCALAMIENTO)
-void calcularMomentoAngularModulo(Planet planets[], double momentos_angulares[]) {
-    for (int i = 0; i < NUM_PLANETS; i++) {
-        // Calcular r (distancia al origen) y v (magnitud de la velocidad)
-        double r = sqrt(planets[i].position[0] * planets[i].position[0] +
-                        planets[i].position[1] * planets[i].position[1]);
-        double v = sqrt(planets[i].velocity[0] * planets[i].velocity[0] +
-                        planets[i].velocity[1] * planets[i].velocity[1]);
-
-        // Momento angular en módulo: L = m * r * v
-        momentos_angulares[i] = planets[i].mass * r * v;
-    }
-}
-
 // Calcular las energías del sistema (SIN RESCALAMIENTO)
 
 void calcularEnergias(Planet planets[], double *energiaCinetica, double *energiaPotencial) {
@@ -253,11 +239,10 @@ int main() {
     // Reescalar el tiempo
     double dt = DAY * factor_tiempo; 
     double tiempo_total = YEAR * DAY * factor_tiempo; 
-    int num_steps = (int)(tiempo_total / dt);
-    //Con esos rescalamientos G=1
+
 
     // Crear un arreglo para almacenar los momentos angulares de cada planeta en cada paso de tiempo
-    double momentos_angulares[num_steps][NUM_PLANETS];
+  
    
     // Crear un arreglo para almacenar los períodos
     double periodos[NUM_PLANETS] = {0};
@@ -293,9 +278,9 @@ int main() {
     }
 
 
-    int step = 0;
+
     //CON EL TIEMPO Y LAS CONDICIONES INICIALES RESCALADAS
-    for (double t = 0; t < tiempo_total; t += dt, step++) {
+    for (double t = 0; t < tiempo_total; t += dt) {
 
         //Calcular posiciones y velocidades en el tiempo t+dt
         actualizarPlanetas(planets, dt);
@@ -315,24 +300,6 @@ int main() {
 
         //Guarda las energías en el archivo. El tiempo en días se tiene en cuenta en el código de python 
         fprintf(archivo, "%.6e %.6e %.6e\n", energiaCinetica, energiaPotencial, energiaMecanica);
-
-
-
-        // Calcular el momento angular en módulo
-        double momentos_angulares_instante[NUM_PLANETS];
-        calcularMomentoAngularModulo(planets, momentos_angulares_instante);
-
-        // Guardar los momentos angulares en el arreglo
-        for (int i = 0; i < NUM_PLANETS; i++) {
-            momentos_angulares[step][i] = momentos_angulares_instante[i];
-        }
-        // Escribir los momentos angulares en el archivo en formato de columnas
-        for (int i = 0; i < NUM_PLANETS; i++) { // Iterar sobre los planetas (columnas)
-        for (int j = 0; j < num_steps; j++) { // Iterar sobre los tiempos (filas)
-            fprintf(archivo_momento, "%.6e ", momentos_angulares[j][i]);
-        }
-        fprintf(archivo_momento, "\n"); // Nueva línea para separar columnas
-    }
 
 
         if ((int)(t / dt) % 30 == 0) { // Imprimir cada 30 días

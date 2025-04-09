@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <math.h>
-#include <stdlib.h> // Para usar malloc y free
+#include <time.h> 
 #include <stdbool.h>
 
 
@@ -245,6 +245,7 @@ double calcularMomentoAngularTotal(Planet planets[]) {
 
 
 int main() {
+    time_t inicio = time(NULL); // Guardar el tiempo de inicio de la simulación
 
     int vueltas[NUM_PLANETS];
     Planet planets[NUM_PLANETS];
@@ -368,5 +369,10 @@ int main() {
     fclose(archivo);
     fclose(archivo_posiciones);
     fclose(archivo_momento_total);
+    time_t fin = time(NULL); // Guardar el tiempo de finalización de la simulación
+    printf("Tiempo de inicio: %s", ctime(&inicio)); // Imprimir el tiempo de inicio
+    printf("Tiempo de finalización: %s", ctime(&fin)); // Imprimir el tiempo de finalización
+    double tiempo_total_simulacion = difftime(fin, inicio); // Calcular el tiempo total de la simulación
+    printf("Tiempo total de simulación: %.8f segundos\n", tiempo_total_simulacion); // Imprimir el tiempo total de la simulación
     return 0;
 }

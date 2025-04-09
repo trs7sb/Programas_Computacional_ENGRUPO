@@ -9,7 +9,12 @@
                 "-g",
                 "${file}",
                 "-o",
-                "${fileDirname}\\${fileBasenameNoExtension}.exe"
+                "${fileDirname}\\${fileBasenameNoExtension}.exe",
+                "-L/mingw64/lib",
+                "-lgsl",
+                "-lgslcblas",
+                "-lm",
+                "-pg",
             ],
             "options": {
                 "cwd": "${fileDirname}"

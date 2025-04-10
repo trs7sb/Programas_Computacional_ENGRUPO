@@ -9,7 +9,7 @@
 #define AU 1.496e11   // Unidad astronómica (m)
 #define DAY 86400     // Un día en segundos
 #define YEAR 365.25   // Un año en días
-#define NUM_PLANETS 10 // Número de planetas (incluyendo el Sol)
+#define NUM_PLANETS 20 // Número de planetas (incluyendo el Sol)
 #define MASA_SOLAR 1.989e30 // Masa del Sol en kg
 
 // Datos de los planetas (masas en kg, distancias iniciales en m, velocidades iniciales en la dirección y en m/s)
@@ -40,7 +40,18 @@ void inicializarPlanetas(Planet planets[]) {
         {"Saturno", 5.6834e26, {9.58 * AU, 0}, {0, 9680}},
         {"Urano", 8.6810e25, {19.22 * AU, 0}, {0, 6800}},
         {"Neptuno", 1.02413e26, {30.05 * AU, 0}, {0, 5430}},
-        {"Plutón", 1.30900e22, {39.48 * AU, 0}, {0, 4748}}
+        {"Plutón", 1.30900e22, {39.48 * AU, 0}, {0, 4748}},
+        // Nuevos planetas ficticios con nombres de dioses griegos
+        {"Zeus", 2.5e24, {45.0 * AU, 0}, {0, 4000}},
+        {"Hera", 3.0e24, {50.0 * AU, 0}, {0, 3500}},
+        {"Poseidón", 1.8e24, {55.0 * AU, 0}, {0, 3000}},
+        {"Hades", 2.2e24, {60.0 * AU, 0}, {0, 2500}},
+        {"Atenea", 1.5e24, {65.0 * AU, 0}, {0, 2000}},
+        {"Apolo", 2.8e24, {70.0 * AU, 0}, {0, 1500}},
+        {"Artemisa", 1.9e24, {75.0 * AU, 0}, {0, 1000}},
+        {"Afrodita", 2.1e24, {80.0 * AU, 0}, {0, 800}},
+        {"Ares", 1.7e24, {85.0 * AU, 0}, {0, 600}},
+        {"Hermes", 2.3e24, {90.0 * AU, 0}, {0, 400}}
     };
     for (int i = 0; i < NUM_PLANETS; i++) {
         planets[i] = temp[i];

@@ -298,7 +298,7 @@ int main() {
     reescalarVelocidades(planets, factor_tiempo);
 
     // Reescalar el tiempo
-    double dt = DAY * factor_tiempo; 
+    double dt = 0.1*DAY * factor_tiempo; 
     double tiempo_total = 50*YEAR * DAY * factor_tiempo; 
 
     FILE *archivo = fopen("energias.txt", "w");

@@ -9,7 +9,7 @@
 #define AU 1.496e11   // Unidad astronómica (m)
 #define DAY 86400     // Un día en segundos
 #define YEAR 365.25   // Un año en días
-#define NUM_PLANETS 20 // Número de planetas (incluyendo el Sol)
+#define NUM_PLANETS 40 // Número de planetas (incluyendo el Sol)
 #define MASA_SOLAR 1.989e30 // Masa del Sol en kg
 
 // Datos de los planetas (masas en kg, distancias iniciales en m, velocidades iniciales en la dirección y en m/s)
@@ -51,7 +51,19 @@ void inicializarPlanetas(Planet planets[]) {
         {"Artemisa", 1.9e24, {75.0 * AU, 0}, {0, 1000}},
         {"Afrodita", 2.1e24, {80.0 * AU, 0}, {0, 800}},
         {"Ares", 1.7e24, {85.0 * AU, 0}, {0, 600}},
-        {"Hermes", 2.3e24, {90.0 * AU, 0}, {0, 400}}
+        {"Hermes", 2.3e24, {90.0 * AU, 0}, {0, 400}},
+        // Más planetas ficticios
+        {"Dionisio", 2.0e24, {95.0 * AU, 0}, {0, 300}},
+        {"Hefesto", 1.8e24, {100.0 * AU, 0}, {0, 250}},
+        {"Deméter", 2.2e24, {105.0 * AU, 0}, {0, 200}},
+        {"Persefone", 1.6e24, {110.0 * AU, 0}, {0, 150}},
+        {"Eros", 1.9e24, {115.0 * AU, 0}, {0, 100}},
+        {"Hestia", 2.1e24, {120.0 * AU, 0}, {0, 90}},
+        {"Cronos", 2.4e24, {125.0 * AU, 0}, {0, 80}},
+        {"Rhea", 1.7e24, {130.0 * AU, 0}, {0, 70}},
+        {"Selene", 1.5e24, {135.0 * AU, 0}, {0, 60}},
+        {"Helios", 2.6e24, {140.0 * AU, 0}, {0, 50}},
+        {"Nyx", 1.8e24, {145.0 * AU, 0}, {0, 40}}
     };
     for (int i = 0; i < NUM_PLANETS; i++) {
         planets[i] = temp[i];
@@ -309,7 +321,7 @@ int main() {
     reescalarVelocidades(planets, factor_tiempo);
 
     // Reescalar el tiempo
-    double dt = DAY * factor_tiempo; 
+    double dt = 0.1* DAY * factor_tiempo; 
     double tiempo_total = 50*YEAR * DAY * factor_tiempo; 
 
     FILE *archivo = fopen("energias.txt", "w");

@@ -9,7 +9,7 @@
 #define AU 1.496e11   // Unidad astronómica (m)
 #define DAY 86400     // Un día en segundos
 #define YEAR 365.25   // Un año en días
-#define NUM_PLANETS 13 // Número de planetas (incluyendo el Sol)
+#define NUM_PLANETS 15 // Número de planetas (incluyendo el Sol)
 #define MASA_SOLAR 1.989e30 // Masa del Sol en kg
 
 // Datos de los planetas (masas en kg, distancias iniciales en m, velocidades iniciales en la dirección y en m/s)
@@ -30,26 +30,17 @@ void inicializarPlanetas(Planet planets[]) {
         {"Mercurio", 3.3011e23, {0.39 * AU, 0}, {0, 47400}},
         {"Venus", 4.8675e24, {0.72 * AU, 0}, {0, 35020}},
         {"Tierra", 5.97237e24, {1.0 * AU, 0}, {0, 29780}},
-        {"Luna", 7.342e22, {1.0 * AU + 384400000, 0}, {0, 1022+29780}}, // Luna de la Tierra
+        {"Luna", 7.342e22, {1.0 * AU + 384400000, 0}, {0, 1022 + 29780}}, // Luna de la Tierra
         {"Marte", 6.4171e23, {1.52 * AU, 0}, {0, 24070}},
         {"Júpiter", 1.8982e27, {5.2 * AU, 0}, {0, 13070}},
-        {"Europa", 4.7998e22, {5.2 * AU + 671100000, 0}, {0, 13070+ 1374}}, // Luna Europa de Júpiter
-        {"Ganímedes", 1.4819e23, {5.2 * AU + 1070400000, 0}, {0, 13070+1080}}, // Luna Ganímedes de Júpiter
+        {"Ío", 8.9319e22, {5.2 * AU + 421700000, 0}, {0, 13070 + 17334}}, // Luna Ío de Júpiter
+        {"Europa", 4.7998e22, {5.2 * AU + 671100000, 0}, {0, 13070 + 1374}}, // Luna Europa de Júpiter
+        {"Ganímedes", 1.4819e23, {5.2 * AU + 1070400000, 0}, {0, 13070 + 1080}}, // Luna Ganímedes de Júpiter
+        {"Calisto", 1.0759e23, {5.2 * AU + 1882700000, 0}, {0, 13070 + 8204}}, // Luna Calisto de Júpiter
         {"Saturno", 5.6834e26, {9.58 * AU, 0}, {0, 9680}},
         {"Urano", 8.6810e25, {19.22 * AU, 0}, {0, 6800}},
         {"Neptuno", 1.02413e26, {30.05 * AU, 0}, {0, 5430}},
-        {"Plutón", 1.30900e22, {39.48 * AU, 0}, {0, 4748}},
-        /*Nuevos planetas ficticios
-        {"PlanetaX", 2.5e24, {50.0 * AU, 0}, {0, 4000}},
-        {"Gaia", 3.0e24, {60.0 * AU, 0}, {0, 3500}},
-        {"Zeus", 4.0e24, {70.0 * AU, 0}, {0, 3000}},
-        {"Hera", 5.0e24, {80.0 * AU, 0}, {0, 2500}},
-        {"Ares", 6.0e24, {90.0 * AU, 0}, {0, 2000}},
-        {"Poseidon", 7.0e24, {100.0 * AU, 0}, {0, 1500}},
-        {"Athena", 8.0e24, {110.0 * AU, 0}, {0, 1000}},
-        {"Apollo", 9.0e24, {120.0 * AU, 0}, {0, 800}},
-        {"Artemis", 1.0e25, {130.0 * AU, 0}, {0, 600}},
-        {"Hades", 1.1e25, {140.0 * AU, 0}, {0, 400}}*/
+        {"Plutón", 1.30900e22, {39.48 * AU, 0}, {0, 4748}}
     };
     for (int i = 0; i < NUM_PLANETS; i++) {
         planets[i] = temp[i];

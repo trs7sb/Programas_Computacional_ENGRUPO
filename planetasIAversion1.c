@@ -148,15 +148,18 @@ void calcularAceleraciones(Planet planets[], double a[NUM_PLANETS][2]) {
 // Calcular las energías del sistema (SIN RESCALAMIENTO)
 
 void calcularEnergias(Planet planets[], double *energiaCinetica, double *energiaPotencial) {
-    *energiaCinetica = 0;
-    *energiaPotencial = 0;
+    energiaCinetica[0] = 0;
+    energiaPotencial[0] = 0;
     double energiaCineticaLocal = 0;
+    double velocidad2;
+    int i;
     // Energía cinética del sistema
     //#pragma omp parallel for divide la iteraciones del for entre los hilos disponibles
     //reduction(+:energiaCinetica) cada hilo tiene su propia copia privada de energiaCinetica y al final se suman todas las copias
     #pragma omp parallel for reduction(+:energiaCineticaLocal) 
-    for (int i = 0; i < NUM_PLANETS; i++) {
-        double velocidad2 = planets[i].velocity[0] * planets[i].velocity[0] +
+
+    for (i = 0; i < NUM_PLANETS; i++) {
+        velocidad2 = planets[i].velocity[0] * planets[i].velocity[0] +
                             planets[i].velocity[1] * planets[i].velocity[1];
         energiaCineticaLocal += 0.5 * planets[i].mass * velocidad2;
     }

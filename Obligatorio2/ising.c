@@ -10,10 +10,13 @@
 #define K_BOLTZMANN 1.380649e-23// Constante de Boltzmann (J/K)
 
 // Función para inicializar la red con espines aleatorios (+1 o -1)
-//rand() % 2 genera números aleatorios entre 0 y 1 
+//rand() genera números pseudoaleatorios entre 0 y RAND_MAX
+// El operador % 2 genera números entre 0 y 1.
 void inicializarRed(int red[N][N]) {
-    for (int i = 0; i < N; i++) {
-        for (int j = 0; j < N; j++) {
+    int i;
+    int j;
+    for (i = 0; i < N; i++) {
+        for (j = 0; j < N; j++) {
             red[i][j] = (rand() % 2) * 2 - 1; // Genera +1 o -1
         }
     }

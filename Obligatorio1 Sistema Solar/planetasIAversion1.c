@@ -12,9 +12,10 @@
 #define NUM_PLANETS 10 // Número de planetas (incluyendo el Sol)
 #define MASA_SOLAR 1.989e30 // Masa del Sol en kg
 
-// Datos de los planetas (masas en kg, distancias iniciales en m, velocidades iniciales en la dirección y en m/s)
+// Datos de los planetas (masas en kg, distancias iniciales en m, velocidades iniciales en la dirección "y" en m/s)
 // typedef permite crear objetos de tipo struct sin tener que escribir la palabra struct cada vez 
 typedef struct {
+    // Se define un tipo de dato llamado Planet que acceder a los atributos de cada planeta 
     char name[20]; // Nombre del planeta
     double mass;       // Masa del planeta
     double position[2]; // Posición (x, y) en m
@@ -24,7 +25,10 @@ typedef struct {
 
 // Inicializar datos reales de los planetas
 void inicializarPlanetas(Planet planets[]) { 
-    // Datos simplificados: nombre, masa (kg), posición inicial (m), velocidad inicial (m/s)
+    /*Planet temp[NUM_PLANETS] es un array de tipo struct que almacena en cada uno de sus elementos los atributos de un planeta concreto. 
+    Se trata de un array temporal (temp) porque se utiliza para almacenar los datos iniciales de los planetas antes de copiarlos al array
+    principal planets. Así queda el código más organizado.
+    */
     Planet temp[NUM_PLANETS] = {
         {"Sol", MASA_SOLAR, {0, 0}, {0, 0}}, 
         {"Mercurio", 3.3011e23, {0.39 * AU, 0}, {0, 47400}},
@@ -32,7 +36,7 @@ void inicializarPlanetas(Planet planets[]) {
         {"Tierra", 5.97237e24, {1.0 * AU, 0}, {0, 29780}},
         //{"Luna", 7.342e22, {1.0 * AU + 384400000, 0}, {0, 1022 + 29780}}, // Luna de la Tierra
         {"Marte", 6.4171e23, {1.52 * AU, 0}, {0, 24070}},
-        {"Júpiter", 1.8982e27, {5.2 * AU, 0}, {0, 13070}},
+        {"Júpiter", 1000*1.8982e27, {5.2 * AU, 0}, {0, 13070}},
         //{"Ío", 8.9319e22, {5.2 * AU + 421700000, 0}, {0, 13070 + 17334}}, // Luna Ío de Júpiter
         //{"Europa", 4.7998e22, {5.2 * AU + 671100000, 0}, {0, 13070 + 1374}}, // Luna Europa de Júpiter
         //{"Ganímedes", 1.4819e23, {5.2 * AU + 1070400000, 0}, {0, 13070 + 1080}}, // Luna Ganímedes de Júpiter
@@ -42,21 +46,25 @@ void inicializarPlanetas(Planet planets[]) {
         {"Neptuno", 1.02413e26, {30.05 * AU, 0}, {0, 5430}},
         {"Plutón", 1.30900e22, {39.48 * AU, 0}, {0, 4748}}
     };
-    for (int i = 0; i < NUM_PLANETS; i++) {
+    // Copiar los datos iniciales de los planetas al array principal
+     int i;
+    for (i= 0; i < NUM_PLANETS; i++) {
         planets[i] = temp[i];
     }
 }
 
 // Función para dividir la masa de los planetas entre la masa solar
 void normalizarMasa(Planet planets[]) {
-    for (int i = 0; i < NUM_PLANETS; i++) {
+    int i;
+    for (i = 0; i < NUM_PLANETS; i++) {
         planets[i].mass /= MASA_SOLAR;
     }
 }
 
 // Función para convertir distancias y velocidades a unidades astronómicas (UA y UA/s)
 void convertirUnidadesAU(Planet planets[]) {
-    for (int i = 0; i < NUM_PLANETS; i++) {
+    int i;
+    for (i = 0; i < NUM_PLANETS; i++) {
         // Convertir posición de metros a UA
         planets[i].position[0] /= AU;
         planets[i].position[1] /= AU;
@@ -69,7 +77,8 @@ void convertirUnidadesAU(Planet planets[]) {
 
 // Función para convertir de unidades rescaladas a unidades originales
 void convertirAUnidadesOriginales(Planet planets[]) {
-    for (int i = 0; i < NUM_PLANETS; i++) {
+    int i; 
+    for (i = 0; i < NUM_PLANETS; i++) {
         // Convertir masa de masas solares a kilogramos
         planets[i].mass *= MASA_SOLAR;
 
@@ -85,7 +94,8 @@ void convertirAUnidadesOriginales(Planet planets[]) {
 
 // Función para reescalar las velocidades según el factor de tiempo
 void reescalarVelocidades(Planet planets[], double factor_tiempo) {
-    for (int i = 0; i < NUM_PLANETS; i++) {
+    int i;
+    for (i = 0; i < NUM_PLANETS; i++) {
         planets[i].velocity[0] /= factor_tiempo;
         planets[i].velocity[1] /= factor_tiempo;
     }
@@ -93,7 +103,8 @@ void reescalarVelocidades(Planet planets[], double factor_tiempo) {
 
 // Función para deshacer el reescalado de las velocidades
 void deshacerReescaladoVelocidades(Planet planets[], double factor_tiempo) {
-    for (int i = 0; i < NUM_PLANETS; i++) {
+    int i; 
+    for (i = 0; i < NUM_PLANETS; i++) {
         planets[i].velocity[0] *= factor_tiempo;
         planets[i].velocity[1] *= factor_tiempo;
     }
@@ -101,18 +112,26 @@ void deshacerReescaladoVelocidades(Planet planets[], double factor_tiempo) {
 
 // Calcular la fuerza gravitacional entre dos planetas
 void calcularFuerza(Planet *a, Planet *b, double *fx, double *fy) {
-    double dx = b->position[0] - a->position[0];
-    double dy = b->position[1] - a->position[1];
-    double distancia = sqrt(dx * dx + dy * dy);
-    double fuerza = (1*a->mass * b->mass) / (distancia * distancia); //G es la unidad debido al rescalamiento
+    double dx,dy,distancia,fuerza; 
+     dx = b->position[0] - a->position[0];
+     dy = b->position[1] - a->position[1];
+    // dx y dy son las diferencias de posición entre los planetas a y b
+
+    distancia = sqrt(dx * dx + dy * dy);
+    fuerza = (1*a->mass * b->mass) / (distancia * distancia); //G es la unidad debido al rescalamiento
     *fx = fuerza * dx / distancia; //Componente x del vector fuerza 
     *fy = fuerza * dy / distancia; //Componente y del vector fuerza
 }
-//b es un puntero de tipo Planet, apunta a una dirección de memoria de una variable de tipo Planet
-//-> es un operador de acceso a una propiedad del struct Planet equivalente a (*b).position[0]
-
+//ANOTACIÓN SOBRE EL OPERADOR ->
+/*
+b es un puntero de tipo Planet, apunta a una dirección de memoria de una variable de tipo Planet.
+-> es un operador de acceso a una propiedad del struct Planet equivalente a
+ por ejemplo, (*b).position[0], que accede a la posición en x del planeta b. 
+ a->mass accede a la masa del planeta a.
+*/
 
 void calcularAceleraciones(Planet planets[], double a[NUM_PLANETS][2]) {
+
     double fuerzas[NUM_PLANETS][2] = {0};
 
     // Paralelizar el cálculo de las fuerzas gravitacionales
@@ -120,8 +139,9 @@ void calcularAceleraciones(Planet planets[], double a[NUM_PLANETS][2]) {
     //dynamic apropiado cuando las iteraciones tienen distintos costes computacionales
     //distribuye las iteraciones de manera dinámica entre los hilos sin orden considerando su tiempo de ejecución
    // #pragma omp parallel for schedule(dynamic)
-    for (int i = 0; i < NUM_PLANETS; i++) {
-        for (int j = i + 1; j < NUM_PLANETS; j++) {
+   int i, j, k;
+    for (i = 0; i < NUM_PLANETS; i++) {
+        for (j = i + 1; j < NUM_PLANETS; j++) {
             double fx, fy;
             calcularFuerza(&planets[i], &planets[j], &fx, &fy);
             //omp atomic evita conflictos al utilizar una misma variable compartida
@@ -139,17 +159,30 @@ void calcularAceleraciones(Planet planets[], double a[NUM_PLANETS][2]) {
 
     // Calcular aceleraciones a partir de las fuerzas
     #pragma omp parallel for
-    for (int i = 0; i < NUM_PLANETS; i++) {
-        a[i][0] = fuerzas[i][0] / planets[i].mass;
-        a[i][1] = fuerzas[i][1] / planets[i].mass;
+    for (k = 0; k < NUM_PLANETS; k++) {
+        a[k][0] = fuerzas[k][0] / planets[k].mass;
+        a[k][1] = fuerzas[k][1] / planets[k].mass;
+    }
+
+    /* Creemos que calcular las aceleraciones a partir de la fuerzas disminuye el tiempo de ejecución porque 
+    se calcula sólo la fuerza una vez por cada par de planetas,*/
+}
+ 
+//Calcula el módulo de la velocidad 
+void calcularModulosVelocidad(Planet planets[], double modulosVelocidad[]) {
+    int i; 
+    for (i = 0; i < NUM_PLANETS; i++) {
+        modulosVelocidad[i] = sqrt(planets[i].velocity[0] * planets[i].velocity[0] +
+                                   planets[i].velocity[1] * planets[i].velocity[1]);
     }
 }
 
-// Calcular las energías del sistema (SIN RESCALAMIENTO)
 
+// Calcular las energías del sistema (SIN RESCALAMIENTO)
 void calcularEnergias(Planet planets[], double *energiaCinetica, double *energiaPotencial) {
     energiaCinetica[0] = 0;
     energiaPotencial[0] = 0;
+    double modulosVelocidad[NUM_PLANETS] = 0;
     double energiaCineticaLocal = 0;
     double velocidad2;
     int i;
@@ -158,10 +191,9 @@ void calcularEnergias(Planet planets[], double *energiaCinetica, double *energia
     //reduction(+:energiaCinetica) cada hilo tiene su propia copia privada de energiaCinetica y al final se suman todas las copias
     #pragma omp parallel for reduction(+:energiaCineticaLocal) 
 
+    calcularModulosVelocidad(planets, modulosVelocidad);
     for (i = 0; i < NUM_PLANETS; i++) {
-        velocidad2 = planets[i].velocity[0] * planets[i].velocity[0] +
-                            planets[i].velocity[1] * planets[i].velocity[1];
-        energiaCineticaLocal += 0.5 * planets[i].mass * velocidad2;
+        energiaCineticaLocal += 0.5 * planets[i].mass * modulosVelocidad[i]*modulosVelocidad[i]; // Energía cinética
     }
 
     /*Cada hilo calcula el valor de velocidad2 para las iteraciones del bucle que le han sido asignadas. 
@@ -170,19 +202,20 @@ void calcularEnergias(Planet planets[], double *energiaCinetica, double *energia
     En este caso, las copias privadas se suman para obtener el valor final de *energiaCinetica
     */
 
-    //Usamos una variable de tipo double porque no se pueden utilizar punteros en reduction
+    //Usamos una variable de tipo double porque no se pueden utilizar punteros en reduction.
 
     *energiaCinetica = energiaCineticaLocal;
     
-
      // Energía potencial del sistema
      double energiaPotencialLocal = 0; // Variable local para la reducción
+     int i,j;
+     double dx, dy, distancia;
      #pragma omp parallel for reduction(+:energiaPotencialLocal)
-     for (int i = 0; i < NUM_PLANETS; i++) {
-         for (int j = i + 1; j < NUM_PLANETS; j++) {
-             double dx = planets[j].position[0] - planets[i].position[0];
-             double dy = planets[j].position[1] - planets[i].position[1];
-             double distancia = sqrt(dx * dx + dy * dy);
+     for (i = 0; i < NUM_PLANETS; i++) {
+         for (j = i + 1; j < NUM_PLANETS; j++) {
+             dx = planets[j].position[0] - planets[i].position[0];
+             dy = planets[j].position[1] - planets[i].position[1];
+             distancia = sqrt(dx * dx + dy * dy);
              energiaPotencialLocal -= (G * planets[i].mass * planets[j].mass) / distancia;
          }
      }
@@ -200,33 +233,35 @@ void actualizarPlanetas(Planet planets[], double dt) {
     double w[NUM_PLANETS][2] = {0};
 
     //Almacena en un array w las velocidades y aceleraciones en el tiempo t 
-
-    for (int i = 1; i < NUM_PLANETS; i++) {
+    int i; 
+    for (i = 1; i < NUM_PLANETS; i++) {
         w[i][0] = planets[i].velocity[0] + 0.5 * dt * a[i][0];
         w[i][1] = planets[i].velocity[1] + 0.5 * dt * a[i][1];
     }
 
     // Actualizar posiciones al tiempo t+dt
-    for (int i = 0; i < NUM_PLANETS; i++) {
-        planets[i].position[0] += planets[i].velocity[0] * dt + 0.5 * a[i][0] * dt * dt;
-        planets[i].position[1] += planets[i].velocity[1] * dt + 0.5 * a[i][1] * dt * dt;
+    int j;
+    for (j= 0; j < NUM_PLANETS; j++) {
+        planets[j].position[0] += planets[j].velocity[0] * dt + 0.5 * a[j][0] * dt * dt;
+        planets[j].position[1] += planets[j].velocity[1] * dt + 0.5 * a[j][1] * dt * dt;
     }
 
     // Calcular la aceleración con las posiciones actualizadas
     calcularAceleraciones(planets, a);
 
     //Calcular las nuevas velocidades al tiempo t+dt a partir de las aceleraciones en el tiempo t+dt y el array w
-    for (int i = 0; i < NUM_PLANETS; i++) {
-        planets[i].velocity[0] = w[i][0] + 0.5 * a[i][0] * dt;
-        planets[i].velocity[1] = w[i][1] + 0.5 * a[i][1] * dt;
+    int k; 
+    for ( k = 0; k < NUM_PLANETS; k++) {
+        planets[k].velocity[0] = w[k][0] + 0.5 * a[k][0] * dt;
+        planets[k].velocity[1] = w[k][1] + 0.5 * a[k][1] * dt;
     }
 }
 
 // Imprimir las posiciones de los planetas en un instante de tiempo
 void imprimirPosiciones(Planet planets[], double tiempo) {
     printf("Tiempo: %.2f días\n", tiempo / DAY);
-
-    for (int i = 0; i < NUM_PLANETS; i++) {
+    int i;
+    for ( i = 0; i < NUM_PLANETS; i++) {
         printf("%s: x = %.2e, y = %.2e\n", planets[i].name, planets[i].position[0], planets[i].position[1]);
     }
     printf("\n"); //salto de línea
@@ -234,7 +269,8 @@ void imprimirPosiciones(Planet planets[], double tiempo) {
 
 // Función para guardar las posiciones de los planetas en un archivo
 void guardarPosiciones(Planet planets[], FILE *archivo_posiciones) {
-    for (int i = 0; i < NUM_PLANETS; i++) {
+    int i;
+    for ( i = 0; i < NUM_PLANETS; i++) {
         fprintf(archivo_posiciones, "%.6e, %.6e\n", planets[i].position[0], planets[i].position[1]);
     }
     fprintf(archivo_posiciones, "\n"); // Línea en blanco para separar instantes de tiempo
@@ -242,7 +278,8 @@ void guardarPosiciones(Planet planets[], FILE *archivo_posiciones) {
 
 // Función para calcular los períodos de los planetas usando la Tercera Ley de Kepler
 void calcularPeriodos(Planet planets[], double periodos[], double t) {
-    for (int i = 0; i < NUM_PLANETS; i++) {
+    int i; 
+    for (i = 0; i < NUM_PLANETS; i++) {
             if((planets[i].position[1] < 0) && (periodos[i]==0))
             {
                 periodos[i] = 2*t;
@@ -253,18 +290,20 @@ void calcularPeriodos(Planet planets[], double periodos[], double t) {
  
 double calcularMomentoAngularTotal(Planet planets[]) {
     double momento_angular_total = 0.0;
+    int i;
+    double r, momento_angular; 
+    double modulosVelocidad[NUM_PLANETS] = 0;
 
-    for (int i = 0; i < NUM_PLANETS; i++) {
+    for (i = 0; i < NUM_PLANETS; i++) {
         // Módulo de la posición
         double r = sqrt(planets[i].position[0] * planets[i].position[0] +
                         planets[i].position[1] * planets[i].position[1]);
 
         // Módulo de la velocidad
-        double v = sqrt(planets[i].velocity[0] * planets[i].velocity[0] +
-                        planets[i].velocity[1] * planets[i].velocity[1]);
+      calcularModulosVelocidad(planets, modulosVelocidad);
 
         // Momento angular del planeta
-        double momento_angular = planets[i].mass * r * v;
+        double momento_angular = planets[i].mass * r * modulosVelocidad[i];
 
         // Sumar al momento angular total
         momento_angular_total += momento_angular;
@@ -325,12 +364,13 @@ int main() {
     }
 
     //Inicializar el número de vueltas completas de cada planeta
-    for (int i = 0; i < NUM_PLANETS; i++) {
+    int i; 
+    for (i = 0; i < NUM_PLANETS; i++) {
         vueltas[i] = 0;
     }
 
     bool cruzo_eje[NUM_PLANETS]; // Indica si el planeta ha cruzado el eje y
-    for (int i = 0; i < NUM_PLANETS; i++) {
+    for (i = 0; i < NUM_PLANETS; i++) {
         cruzo_eje[i] = false; // Inicialmente, ningún planeta ha cruzado el eje
     }
 
@@ -372,45 +412,21 @@ int main() {
         // Reescalar las velocidades nuevamente para continuar la simulación
         reescalarVelocidades(planets, factor_tiempo);
 
-        //Calcular el número de vueltas completas de cada planeta y guardarlo en un array
-       /*for (int i = 0; i < NUM_PLANETS; i++) {
-            // Detectar si el planeta cruza el eje x
-            if (planets[i].position[1] < 0 && !cruzo_eje[i]) {
-                cruzo_eje[i] = true; // Marca que el planeta ha cruzado el eje
-            } else if (planets[i].position[1] >= 0 && cruzo_eje[i]) {
-                // Si vuelve a cruzar hacia y > 0, cuenta una vuelta completa
-                vueltas[i]++;
-                cruzo_eje[i] = false; // Reinicia el estado para el próximo cruce
-            }
-
-        {*/
+        
             calcularPeriodos(planets, periodos, t);
     }
-
-
-    /* Imprimir el número de vueltas completas
-    printf("Número de vueltas completas de los planetas:\n");
-    for (int i = 0; i < NUM_PLANETS; i++) {
-        printf("%s: %d vueltas\n", planets[i].name, vueltas[i]);
-    }
-    
-    // Calcular e imprimir el período orbital de cada planeta
-    printf("\nPeríodos orbitales de los planetas.:\n");
-    for (int i = 0; i < NUM_PLANETS; i++) {
-     if (vueltas[i] > 0) {
-        double periodo = (50*YEAR) / vueltas[i]; // Tiempo total dividido por el número de vueltas
-        printf("%s: %.2f años\n", planets[i].name, periodo/YEAR); 
-    } else {
-        printf("%s: No completó ninguna vuelta.\n", planets[i].name);
-    }*/
 
     fclose(archivo);
     fclose(archivo_posiciones);
     fclose(archivo_momento_total);
     time_t fin = time(NULL); // Guardar el tiempo de finalización de la simulación
+
+    // Imprimir los períodos de cada planeta
     for (int i = 0; i < NUM_PLANETS; i++) {
-        printf("%s: %.2f años\n", planets[i].name, periodos[i]/( factor_tiempo*DAY* YEAR)); // Imprimir los períodos de cada planeta
+        printf("%s: %.2f años\n", planets[i].name, periodos[i]/( factor_tiempo*DAY* YEAR)); 
      }
+
+
     printf("Tiempo de inicio: %s", ctime(&inicio)); // Imprimir el tiempo de inicio
     printf("Tiempo de finalización: %s", ctime(&fin)); // Imprimir el tiempo de finalización
     double tiempo_total_simulacion = difftime(fin, inicio); // Calcular el tiempo total de la simulación

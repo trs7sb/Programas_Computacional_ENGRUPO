@@ -12,17 +12,17 @@
 #   (...)
 #   xN_1, yN_1
 #   
-#   x1_2, y1_2
+#   x1_2, y2_2
 #   x2_2, y2_2
 #   x3_2, y3_2
 #   (...)
-#   xN_2, yN_2
+#   xN_2, y2_2
 #
 #   x1_3, y1_3
 #   x2_3, y2_3
 #   x3_3, y3_3
 #   (...)
-#   xN_3, yN_3
+#   xN_3, y3_3
 #   
 #   (...)
 #
@@ -44,18 +44,19 @@ from matplotlib import pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib.patches import Circle
 import numpy as np
+import subprocess
 
 # Parámetros
 # ========================================
 file_in = "posiciones_planetas.txt" # Nombre del fichero de datos
-file_out = "planetas" # Nombre del fichero de salida (sin extensión)
+file_out = "jupitermodificado" # Nombre del fichero de salida (sin extensión)
 
 # Límites de los ejes X e Y
 x_min = -30
 x_max = 30
 y_min = -30
 y_max = 30
-interval = 0.001 # Tiempo entre fotogramas en milisegundos
+interval = 0.00001 # Tiempo entre fotogramas en milisegundos
 show_trail = True # Muestra la "estela" del planeta
 trail_width = 1 # Ancho de la estela
 save_to_file = False # False: muestra la animación por pantalla,
@@ -195,3 +196,10 @@ else:
         fig.savefig("{}.pdf".format(file_out))
     else:
         plt.show()
+        # Use subprocess to run the ffmpeg command
+        subprocess.run([
+            "ffmpeg", "-i", "jupitermodificado.mp4", 
+            "-vcodec", "libx264", "-acodec", "aac", 
+            "jupitermodificado_fixed.mp4"
+        ])
+

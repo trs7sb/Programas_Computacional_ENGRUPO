@@ -6,18 +6,22 @@
 // Constantes
 #define N 10          // Tamaño de la red (N x N)
 #define ITERACIONES 100000 // Número de iteraciones
-#define T 0.0001  // Temperatura en K
-#define K_BOLTZMANN 1.380649e-23// Constante de Boltzmann (J/K)
+#define T 0.0001  
+#define K_BOLTZMANN 1.0 // Constante de Boltzmann (J/K)
 
 // Función para inicializar la red con espines aleatorios (+1 o -1)
-//rand() genera números pseudoaleatorios entre 0 y RAND_MAX
-// El operador % 2 genera números entre 0 y 1.
-void inicializarRed(int red[N][N]) {
-    int i;
-    int j;
+void inicializarRed(int red[N][N], int sesgo) {
+    int i, j;
     for (i = 0; i < N; i++) {
         for (j = 0; j < N; j++) {
-            red[i][j] = (rand() % 2) * 2 - 1; // Genera +1 o -1
+            // Generar un número aleatorio entre 0 y 99
+            int probabilidad = rand() % 100;
+            // Asignar +1 si está dentro del porcentaje de sesgo, -1 en caso contrario
+            if (probabilidad < sesgo) {
+                red[i][j] = 1;
+            } else {
+                red[i][j] = -1;
+            }
         }
     }
 }
@@ -34,10 +38,9 @@ void inicializarRedOrdenada(int red[N][N], int valor) {
 
 // Función para guardar la red en un archivo
 void guardarRed(FILE *archivo, int red[N][N]) {
-    int i; 
-    int j;
+    int i, j;
     for (i = 0; i < N; i++) {
-        for ( j = 0; j < N; j++) {
+        for (j = 0; j < N; j++) {
             fprintf(archivo, "%d", red[i][j]);
             if (j < N - 1) {
                 fprintf(archivo, ","); // Separador entre columnas
@@ -50,55 +53,25 @@ void guardarRed(FILE *archivo, int red[N][N]) {
 
 // Algoritmo de Monte Carlo para el modelo de Ising
 void monteCarloIsing(int red[N][N], double beta, int iteraciones) {
-    int i; 
-    int n, m; 
-    int suma_vecinos;
-    double deltaE; 
-    double probabilidad; 
-    double r; 
+    int i, n, m, suma_vecinos;
+    double deltaE, probabilidad, r;
 
-    FILE *archivo = fopen( "matriz_red.txt", "w");
+    FILE *archivo = fopen("matriz_red.txt", "w");
     if (archivo == NULL) {
         fprintf(stderr, "Error al abrir el archivo para guardar la red.\n");
         exit(1);
     }
 
     for (i = 0; i < iteraciones; i++) {
-
         // Elegir un espín aleatorio en la red
         n = rand() % N;
         m = rand() % N;
 
         // Calcular los vecinos con condiciones de contorno periódicas
-        int arriba, abajo, izquierda, derecha;
-
-        // Vecino de arriba
-        if (n == 0) {
-            arriba = red[N - 1][m]; // Si está en la primera fila, el vecino de arriba está en la última fila
-        } else {
-            arriba = red[n - 1][m];
-        }
-
-        // Vecino de abajo
-        if (n == N - 1) {
-            abajo = red[0][m]; // Si está en la última fila, el vecino de abajo está en la primera fila
-        } else {
-            abajo = red[n + 1][m];
-        }
-
-        // Vecino de la izquierda
-        if (m == 0) {
-            izquierda = red[n][N - 1]; // Si está en la primera columna, el vecino de la izquierda está en la última columna
-        } else {
-            izquierda = red[n][m - 1];
-        }
-
-        // Vecino de la derecha
-        if (m == N - 1) {
-            derecha = red[n][0]; // Si está en la última columna, el vecino de la derecha está en la primera columna
-        } else {
-            derecha = red[n][m + 1];
-        }
+        int arriba = (n == 0) ? red[N - 1][m] : red[n - 1][m];
+        int abajo = (n == N - 1) ? red[0][m] : red[n + 1][m];
+        int izquierda = (m == 0) ? red[n][N - 1] : red[n][m - 1];
+        int derecha = (m == N - 1) ? red[n][0] : red[n][m + 1];
 
         // Calcular el cambio de energía cuando se invierte el espín
         suma_vecinos = arriba + abajo + izquierda + derecha;
@@ -123,13 +96,11 @@ void monteCarloIsing(int red[N][N], double beta, int iteraciones) {
     fclose(archivo);
 }
 
-
 // Función para imprimir la red
 void imprimirRed(int red[N][N]) {
-    int i;
-    int j;
-    for ( i = 0; i < N; i++) {
-        for ( j = 0; j < N; j++) {
+    int i, j;
+    for (i = 0; i < N; i++) {
+        for (j = 0; j < N; j++) {
             printf("%2d ", red[i][j]);
         }
         printf("\n");
@@ -143,26 +114,30 @@ int main() {
     srand(time(NULL));
 
     int red[N][N];
-    int opcion;
+    int opcion, sesgo;
 
     // Solicitar al usuario cómo inicializar la red
     printf("Seleccione cómo inicializar la red:\n");
     printf("1. Aleatoria\n");
-    printf("2. Ordenada con todos +1\n");
-    printf("3. Ordenada con todos -1\n");
-    printf("Ingrese su opción (1, 2 o 3): ");
+    printf("2. Con sesgo de espines paralelos o antiparalelos\n");
+    printf("Ingrese su opción (1 o 2): ");
     scanf("%d", &opcion);
 
-    // Inicializar la red según la opción seleccionada
     if (opcion == 1) {
-        inicializarRed(red);
+        // Inicializar la red de forma completamente aleatoria
+        inicializarRed(red, 50); // 50% de probabilidad para +1 o -1
     } else if (opcion == 2) {
-        inicializarRedOrdenada(red, 1);
-    } else if (opcion == 3) {
-        inicializarRedOrdenada(red, -1);
+        // Solicitar el porcentaje de sesgo
+        printf("Ingrese el porcentaje de sesgo para espines paralelos (0-100): ");
+        scanf("%d", &sesgo);
+        if (sesgo < 0 || sesgo > 100) {
+            printf("Porcentaje inválido. Usando 50%% por defecto.\n");
+            sesgo = 50;
+        }
+        inicializarRed(red, sesgo);
     } else {
         printf("Opción no válida. Inicializando de forma aleatoria por defecto.\n");
-        inicializarRed(red);
+        inicializarRed(red, 50);
     }
 
     // Imprimir la configuración inicial

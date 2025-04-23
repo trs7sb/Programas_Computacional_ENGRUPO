@@ -182,7 +182,7 @@ void calcularModulosVelocidad(Planet planets[], double modulosVelocidad[]) {
 void calcularEnergias(Planet planets[], double *energiaCinetica, double *energiaPotencial) {
     energiaCinetica[0] = 0;
     energiaPotencial[0] = 0;
-    double modulosVelocidad[NUM_PLANETS] = 0;
+    double modulosVelocidad[NUM_PLANETS] ={0};
     double energiaCineticaLocal = 0;
     double velocidad2;
     int i;
@@ -208,7 +208,7 @@ void calcularEnergias(Planet planets[], double *energiaCinetica, double *energia
     
      // Energía potencial del sistema
      double energiaPotencialLocal = 0; // Variable local para la reducción
-     int i,j;
+     int j;
      double dx, dy, distancia;
      #pragma omp parallel for reduction(+:energiaPotencialLocal)
      for (i = 0; i < NUM_PLANETS; i++) {
@@ -292,7 +292,7 @@ double calcularMomentoAngularTotal(Planet planets[]) {
     double momento_angular_total = 0.0;
     int i;
     double r, momento_angular; 
-    double modulosVelocidad[NUM_PLANETS] = 0;
+    double modulosVelocidad[NUM_PLANETS] = {0};
 
     for (i = 0; i < NUM_PLANETS; i++) {
         // Módulo de la posición

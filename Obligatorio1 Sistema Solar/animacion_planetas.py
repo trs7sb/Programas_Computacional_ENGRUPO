@@ -59,7 +59,7 @@ y_max = 30
 interval = 0.00001 # Tiempo entre fotogramas en milisegundos
 show_trail = True # Muestra la "estela" del planeta
 trail_width = 1 # Ancho de la estela
-save_to_file = False # False: muestra la animación por pantalla,
+save_to_file = True # False: muestra la animación por pantalla,
                      # True: la guarda en un fichero
 dpi = 150 # Calidad del vídeo de salida (dots per inch)
 
@@ -133,19 +133,19 @@ planet_points = list()
 planet_trails = list()
 
 # Define una lista de colores para las órbitas
-colors = plt.cm.get_cmap("tab10", nplanets).colors  # Usa un colormap con nplanets colores
+#colors = plt.cm.get_cmap("tab10", nplanets).colors  # Usa un colormap con nplanets colores
 
 for j_planet, (planet_pos, radius) in enumerate(zip(frames_data[0], planet_radius)):
     x, y = planet_pos
     # Representa el planeta como un círculo
-    planet_point = Circle((x, y), radius, color=colors[j_planet])
+    planet_point = Circle((x, y), radius) #, color=colors[j_planet])
     ax.add_artist(planet_point)
     planet_points.append(planet_point)
 
     # Inicializa las estelas (si especificado en los parámetros)
     if show_trail:
         planet_trail, = ax.plot(
-            x, y, "-", linewidth=trail_width, color=colors[j_planet]
+            x, y, "-", linewidth=trail_width #color=colors[j_planet]
         )
         planet_trails.append(planet_trail)
  

@@ -68,10 +68,35 @@ void monteCarloIsing(int red[N][N], double beta, int iteraciones) {
         m = rand() % N;
 
         // Calcular los vecinos con condiciones de contorno periódicas
-        int arriba = (n == 0) ? red[N - 1][m] : red[n - 1][m];
-        int abajo = (n == N - 1) ? red[0][m] : red[n + 1][m];
-        int izquierda = (m == 0) ? red[n][N - 1] : red[n][m - 1];
-        int derecha = (m == N - 1) ? red[n][0] : red[n][m + 1];
+        int arriba, abajo, izquierda, derecha;
+
+        // Vecino de arriba
+        if (n == 0) {
+            arriba = red[N - 1][m]; // Si está en el borde superior, conecta con el último
+        } else {
+            arriba = red[n - 1][m];
+        }
+
+        // Vecino de abajo
+        if (n == N - 1) {
+            abajo = red[0][m]; // Si está en el borde inferior, conecta con el primero
+        } else {
+            abajo = red[n + 1][m];
+        }
+
+        // Vecino de la izquierda
+        if (m == 0) {
+            izquierda = red[n][N - 1]; // Si está en el borde izquierdo, conecta con el último
+        } else {
+            izquierda = red[n][m - 1];
+        }
+
+        // Vecino de la derecha
+        if (m == N - 1) {
+            derecha = red[n][0]; // Si está en el borde derecho, conecta con el primero
+        } else {
+            derecha = red[n][m + 1];
+        }
 
         // Calcular el cambio de energía cuando se invierte el espín
         suma_vecinos = arriba + abajo + izquierda + derecha;

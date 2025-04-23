@@ -133,19 +133,19 @@ planet_points = list()
 planet_trails = list()
 
 # Define una lista de colores para las órbitas
-#colors = plt.cm.get_cmap("tab10", nplanets).colors  # Usa un colormap con nplanets colores
+colors = plt.cm.get_cmap("tab10", nplanets).colors  # Usa un colormap con nplanets colores
 
 for j_planet, (planet_pos, radius) in enumerate(zip(frames_data[0], planet_radius)):
     x, y = planet_pos
     # Representa el planeta como un círculo
-    planet_point = Circle((x, y), radius) #, color=colors[j_planet])
+    planet_point = Circle((x, y), radius, color=colors[j_planet])
     ax.add_artist(planet_point)
     planet_points.append(planet_point)
 
     # Inicializa las estelas (si especificado en los parámetros)
     if show_trail:
         planet_trail, = ax.plot(
-            x, y, "-", linewidth=trail_width #color=colors[j_planet]
+            x, y, "-", linewidth=trail_width, color=colors[j_planet]
         )
         planet_trails.append(planet_trail)
  

@@ -22,6 +22,16 @@ void inicializarRed(int red[N][N]) {
     }
 }
 
+// Función para inicializar la red de forma ordenada (+1 o -1)
+void inicializarRedOrdenada(int red[N][N], int valor) {
+    int i, j;
+    for (i = 0; i < N; i++) {
+        for (j = 0; j < N; j++) {
+            red[i][j] = valor; // Asigna el valor +1 o -1 a toda la red
+        }
+    }
+}
+
 // Función para guardar la red en un archivo
 void guardarRed(FILE *archivo, int red[N][N]) {
     int i; 
@@ -133,9 +143,27 @@ int main() {
     srand(time(NULL));
 
     int red[N][N];
+    int opcion;
 
-    // Inicializar la red con espines aleatorios
-    inicializarRed(red);
+    // Solicitar al usuario cómo inicializar la red
+    printf("Seleccione cómo inicializar la red:\n");
+    printf("1. Aleatoria\n");
+    printf("2. Ordenada con todos +1\n");
+    printf("3. Ordenada con todos -1\n");
+    printf("Ingrese su opción (1, 2 o 3): ");
+    scanf("%d", &opcion);
+
+    // Inicializar la red según la opción seleccionada
+    if (opcion == 1) {
+        inicializarRed(red);
+    } else if (opcion == 2) {
+        inicializarRedOrdenada(red, 1);
+    } else if (opcion == 3) {
+        inicializarRedOrdenada(red, -1);
+    } else {
+        printf("Opción no válida. Inicializando de forma aleatoria por defecto.\n");
+        inicializarRed(red);
+    }
 
     // Imprimir la configuración inicial
     printf("Configuración inicial de la red:\n");

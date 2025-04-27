@@ -49,26 +49,41 @@ import subprocess
 # Parámetros
 # ========================================
 file_in = "posiciones_planetas.txt" # Nombre del fichero de datos
-file_out = "jupitermodificado" # Nombre del fichero de salida (sin extensión)
+file_out = "sistemaconlunas" # Nombre del fichero de salida (sin extensión)
 
 # Límites de los ejes X e Y
-x_min = -30
-x_max = 30
-y_min = -30
-y_max = 30
-interval = 0.00001 # Tiempo entre fotogramas en milisegundos
+x_min = -5
+x_max = 5
+y_min = -5
+y_max = 5
+interval = 1 # Tiempo entre fotogramas en milisegundos
 show_trail = True # Muestra la "estela" del planeta
 trail_width = 1 # Ancho de la estela
-save_to_file = True # False: muestra la animación por pantalla,
+save_to_file = False # False: muestra la animación por pantalla,
                      # True: la guarda en un fichero
 dpi = 150 # Calidad del vídeo de salida (dots per inch)
 
 # Radio del planeta, en las mismas unidades que la posición
 # Puede ser un número (el radio de todos los planetas) o una lista con
 # el radio de cada uno
-planet_radius = 0.1 # Radio de los planetas (en las mismas unidades que la posición)
-#planet_radius = [0.0046504673, 0.0000163071, 0.0000404551, 0.0000426343, 0.1*0.0000426343, 0.0000227009, 0.0004778945, 0.1*0.0004778945, 0.01* 0.0004028667, 0.0001708514,  0.0001655371,0.000001,0.0001655371, 0.0001655371, 0.0001655371, 0.0001655371, 0.0001655371, 0.0001655371, 0.0001655371, 0.0001655371, 0.0001655371, 0.0001655371,0.0001655371 ]
-
+planet_radius = 0.001 # Radio de los planetas (en las mismas unidades que la posición)
+"""planet_radius = [
+    0.0046504673,  # Sol
+    0.0000163071,  # Mercurio
+    0.0000404551,  # Venus
+    0.0000426343,  # Tierra
+    0.00001,       # Luna
+    0.0000426343,  # Marte
+    0.001*0.0000227009,  # Júpiter
+    0.00001*0.0004778945,  # Io
+    0.00001*0.0004778945,  # Europa
+    0.00001*0.0004028667,  # Ganimedes
+    0.00001*0.0001708514,  # Calisto
+    0.0001655371,  # Saturno
+    0.0001655371,  # Urano
+    0.0001655371,  # Neptuno
+    0.0001655371,  # Pluton
+]"""
 
 # Lectura del fichero de datos
 # ========================================
@@ -196,10 +211,4 @@ else:
         fig.savefig("{}.pdf".format(file_out))
     else:
         plt.show()
-        # Use subprocess to run the ffmpeg command
-        subprocess.run([
-            "ffmpeg", "-i", "jupitermodificado.mp4", 
-            "-vcodec", "libx264", "-acodec", "aac", 
-            "jupitermodificado_fixed.mp4"
-        ])
 

@@ -9,8 +9,9 @@
 #define AU 1.496e11   // Unidad astronómica (m)
 #define DAY 86400     // Un día en segundos
 #define YEAR 365.25   // Un año en días
-#define NUM_PLANETS 10 // Número de planetas (incluyendo el Sol)
+#define NUM_PLANETS 15 // Número de planetas (incluyendo el Sol y lunas)
 #define MASA_SOLAR 1.989e30 // Masa del Sol en kg
+# define PI 3.14159265358979323846 // Definición de PI
 
 // Datos de los planetas (masas en kg, distancias iniciales en m, velocidades iniciales en la dirección "y" en m/s)
 // typedef permite crear objetos de tipo struct sin tener que escribir la palabra struct cada vez 
@@ -25,30 +26,41 @@ typedef struct {
 
 // Inicializar datos reales de los planetas
 void inicializarPlanetas(Planet planets[]) { 
-    /*Planet temp[NUM_PLANETS] es un array de tipo struct que almacena en cada uno de sus elementos los atributos de un planeta concreto. 
-    Se trata de un array temporal (temp) porque se utiliza para almacenar los datos iniciales de los planetas antes de copiarlos al array
-    principal planets. Así queda el código más organizado.
-    */
     Planet temp[NUM_PLANETS] = {
         {"Sol", MASA_SOLAR, {0, 0}, {0, 0}}, 
         {"Mercurio", 3.3011e23, {0.39 * AU, 0}, {0, 47400}},
         {"Venus", 4.8675e24, {0.72 * AU, 0}, {0, 35020}},
         {"Tierra", 5.97237e24, {1.0 * AU, 0}, {0, 29780}},
-        //{"Luna", 7.342e22, {1.0 * AU + 384400000, 0}, {0, 1022 + 29780}}, // Luna de la Tierra
+        {"Luna", 7.34767309e22, 
+            {1.0 * AU + 384400000}, 
+            {0, 29780 + 1022}}, // Luna de la Tierra
         {"Marte", 6.4171e23, {1.52 * AU, 0}, {0, 24070}},
-        {"Júpiter", 1000*1.8982e27, {5.2 * AU, 0}, {0, 13070}},
-        //{"Ío", 8.9319e22, {5.2 * AU + 421700000, 0}, {0, 13070 + 17334}}, // Luna Ío de Júpiter
-        //{"Europa", 4.7998e22, {5.2 * AU + 671100000, 0}, {0, 13070 + 1374}}, // Luna Europa de Júpiter
-        //{"Ganímedes", 1.4819e23, {5.2 * AU + 1070400000, 0}, {0, 13070 + 1080}}, // Luna Ganímedes de Júpiter
-        //{"Calisto", 1.0759e23, {5.2 * AU + 1882700000, 0}, {0, 13070 + 8204}}, // Luna Calisto de Júpiter
+        {"Júpiter", 1.8982e27, {5.2 * AU, 0}, {0, 13070}},
+        // Lunas de Júpiter
+        {"Ío", 8.9319e22, 
+            {5.2 * AU + 421700000 * cos(0), 421700000 * sin(0)}, 
+            { - sqrt(G * 1.8982e27 / 421700000) * sin(0), 
+             sqrt(G * 1.8982e27 / 421700000) * cos(0) + 13070 }}, // Luna Ío
+        {"Europa", 4.7998e22, 
+            {5.2 * AU + 671100000 * cos(PI/ 2), 671100000 * sin(PI / 2)}, 
+            { - sqrt(G * 1.8982e27 / 671100000) * sin(PI/ 2), 
+             sqrt(G * 1.8982e27 / 671100000) * cos(PI / 2) + 13070}}, // Luna Europa
+        {"Ganímedes", 1.4819e23, 
+            {5.2 * AU + 1070400000 * cos(PI), 1070400000 * sin(PI)}, 
+            {- sqrt(G * 1.8982e27 / 1070400000) * sin(PI), 
+             sqrt(G * 1.8982e27 / 1070400000) * cos(PI)+ 13070}}, // Luna Ganímedes
+        {"Calisto", 1.0759e23, 
+            {5.2 * AU + 1882700000 * cos(3 * PI / 2), 1882700000 * sin(3 * PI / 2)}, 
+            { - sqrt(G * 1.8982e27 / 1882700000) * sin(3 * PI/ 2), 
+             sqrt(G * 1.8982e27 / 1882700000) * cos(3 * PI/ 2) + 13070}}, // Luna Calisto
         {"Saturno", 5.6834e26, {9.58 * AU, 0}, {0, 9680}},
         {"Urano", 8.6810e25, {19.22 * AU, 0}, {0, 6800}},
         {"Neptuno", 1.02413e26, {30.05 * AU, 0}, {0, 5430}},
         {"Plutón", 1.30900e22, {39.48 * AU, 0}, {0, 4748}}
     };
-    // Copiar los datos iniciales de los planetas al array principal
-     int i;
-    for (i= 0; i < NUM_PLANETS; i++) {
+
+    int i;
+    for (i = 0; i < NUM_PLANETS; i++) {
         planets[i] = temp[i];
     }
 }
@@ -340,7 +352,7 @@ int main() {
     reescalarVelocidades(planets, factor_tiempo);
 
     // Reescalar el tiempo
-    double dt = DAY * factor_tiempo; 
+    double dt = 0.1*DAY * factor_tiempo; 
     double tiempo_total = 50*YEAR * DAY * factor_tiempo; 
 
     FILE *archivo = fopen("energias.txt", "w");

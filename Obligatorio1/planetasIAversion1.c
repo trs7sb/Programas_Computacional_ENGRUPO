@@ -11,7 +11,7 @@
 #define YEAR 365.25   // Un año en días
 #define NUM_PLANETS 15 // Número de planetas (incluyendo el Sol y lunas)
 #define MASA_SOLAR 1.989e30 // Masa del Sol en kg
-# define PI 3.14159265358979323846 // Definición de PI
+#define PI 3.14159265358979323846 // Definición de PI
 
 // Datos de los planetas (masas en kg, distancias iniciales en m, velocidades iniciales en la dirección "y" en m/s)
 // typedef permite crear objetos de tipo struct sin tener que escribir la palabra struct cada vez 

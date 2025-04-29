@@ -133,6 +133,9 @@ void imprimirRed(int red[N][N]) {
 }
 
 int main() {
+
+    // Medir el tiempo de inicio
+
     double beta = 1.0 / (K_BOLTZMANN * T); // Beta = 1 / (k_B * T)
 
     // Inicializa la semilla de números aleatorios
@@ -165,6 +168,8 @@ int main() {
         inicializarRed(red, 50);
     }
 
+    clock_t inicio = clock();
+
     // Imprimir la configuración inicial
     printf("Configuración inicial de la red:\n");
     imprimirRed(red);
@@ -175,6 +180,11 @@ int main() {
     // Imprimir la configuración final
     printf("\nConfiguración final de la red:\n");
     imprimirRed(red);
+
+     // Medir el tiempo de finalización
+     clock_t fin = clock();
+     double tiempo = (double)(fin - inicio) / CLOCKS_PER_SEC;
+     printf("\nTiempo de ejecución: %.2f segundos.\n", tiempo);
 
     return 0;
 }

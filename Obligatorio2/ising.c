@@ -4,9 +4,9 @@
 #include <time.h>
 
 // Constantes
-#define N 10          // Tamaño de la red (N x N)
-#define ITERACIONES 100000 // Número de iteraciones
-#define T 0.0001  
+#define N 100    // Tamaño de la red (N x N)
+#define ITERACIONES 100*N^2 // Número de iteraciones
+#define T 3  
 #define K_BOLTZMANN 1.0 // Constante de Boltzmann (J/K)
 
 // Función para inicializar la red con espines aleatorios (+1 o -1)
@@ -112,10 +112,11 @@ void monteCarloIsing(int red[N][N], double beta, int iteraciones) {
         r = (double)rand() / RAND_MAX;
         if (r < probabilidad) {
             red[n][m] *= -1; // Si se acepta el cambio, invertir el signo del espín
+            // Guardar la red en el archivo si se acepta el cambio
+            guardarRed(archivo, red);
         }
 
-        // Guardar la red en el archivo después de cada iteración
-        guardarRed(archivo, red);
+        
     }
 
     fclose(archivo);

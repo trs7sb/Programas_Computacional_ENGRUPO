@@ -4,9 +4,9 @@
 #include <time.h>
 
 // Constantes
-#define N 100    // Tamaño de la red (N x N)
+#define N 200    // Tamaño de la red (N x N)
 #define ITERACIONES 100*N^2 // Número de iteraciones
-#define T 3  
+#define T 3.0 
 #define K_BOLTZMANN 1.0 // Constante de Boltzmann (J/K)
 
 // Función para inicializar la red con espines aleatorios (+1 o -1)

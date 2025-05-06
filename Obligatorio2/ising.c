@@ -4,9 +4,15 @@
 #include <time.h>
 
 // Constantes
+<<<<<<< HEAD
 #define N 10         // Tamaño de la red (N x N)
 #define ITERACIONES 10000// Número de iteraciones
 #define T 1.5//T_c=2.0 / log(1.0 + sqrt(2.0))
+=======
+#define N 200    // Tamaño de la red (N x N)
+#define ITERACIONES 100*N^2 // Número de iteraciones
+#define T 3.0 
+>>>>>>> bd25ce9801706c8d60fa55d84c2754f551a3afc5
 #define K_BOLTZMANN 1.0 // Constante de Boltzmann (J/K)
 
 // Función para inicializar la red con espines aleatorios (+1 o -1)
@@ -182,6 +188,7 @@ void monteCarloIsing(int red[N][N], double beta, int iteraciones,double energias
         r = (double)rand() / RAND_MAX;
         if (r < probabilidad) {
             red[n][m] *= -1; // Si se acepta el cambio, invertir el signo del espín
+<<<<<<< HEAD
 
             // Calcular la energía total del sistema y guardarla en el array
             energia_index++;
@@ -207,6 +214,12 @@ void monteCarloIsing(int red[N][N], double beta, int iteraciones,double energias
         Si la diferencia entre las energías de dos iteraciones consecutivas es menor que un umbral definido (por ejemplo, 1e-6), 
         se puede considerar que el sistema ha convergido.
         */
+=======
+            // Guardar la red en el archivo si se acepta el cambio
+            guardarRed(archivo, red);
+        }
+
+>>>>>>> bd25ce9801706c8d60fa55d84c2754f551a3afc5
         
     }
 
@@ -226,6 +239,9 @@ void imprimirRed(int red[N][N]) {
 }
 
 int main() {
+
+    // Medir el tiempo de inicio
+
     double beta = 1.0 / (K_BOLTZMANN * T); // Beta = 1 / (k_B * T)
 
     // Inicializa la semilla de números aleatorios
@@ -261,6 +277,8 @@ int main() {
         inicializarRed(red, 50);
     }
 
+    clock_t inicio = clock();
+
     // Imprimir la configuración inicial
     printf("Configuración inicial de la red:\n");
     imprimirRed(red);
@@ -272,6 +290,7 @@ int main() {
     printf("\nConfiguración final de la red:\n");
     imprimirRed(red);
 
+<<<<<<< HEAD
     FILE *archivo_energias = fopen("energias_vs_iteraciones.txt", "w");
     if (archivo_energias == NULL) {
         fprintf(stderr, "Error al abrir el archivo para guardar las energías.\n");
@@ -294,6 +313,12 @@ int main() {
     fclose(archivo_energias);
 
   
+=======
+     // Medir el tiempo de finalización
+     clock_t fin = clock();
+     double tiempo = (double)(fin - inicio) / CLOCKS_PER_SEC;
+     printf("\nTiempo de ejecución: %.2f segundos.\n", tiempo);
+>>>>>>> bd25ce9801706c8d60fa55d84c2754f551a3afc5
 
     return 0;
 }

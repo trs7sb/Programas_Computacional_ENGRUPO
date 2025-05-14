@@ -1,0 +1,29 @@
+import numpy as np
+from scipy.optimize import curve_fit
+from Obligatorio2_ModeloIsing import N_squared, teresa_times, irene_times
+
+# Python
+
+# Define a quadratic function: y = ax^2 + bx + c
+def quadratic(x, a, b, c):
+    return a * x**2 + b * x + c
+
+def test_quadratic_fit_teresa():
+    # Fit the data for Teresa
+    params_teresa, _ = curve_fit(quadratic, N_squared, teresa_times)
+    a_teresa, b_teresa, c_teresa = params_teresa
+
+    # Assert the coefficients are within expected ranges
+    assert np.isclose(a_teresa, 1e-6, atol=1e-6)
+    assert np.isclose(b_teresa, 1e-3, atol=1e-3)
+    assert np.isclose(c_teresa, 0.01, atol=0.01)
+
+def test_quadratic_fit_irene():
+    # Fit the data for Irene
+    params_irene, _ = curve_fit(quadratic, N_squared, irene_times)
+    a_irene, b_irene, c_irene = params_irene
+
+    # Assert the coefficients are within expected ranges
+    assert np.isclose(a_irene, 1e-6, atol=1e-6)
+    assert np.isclose(b_irene, 1e-3, atol=1e-3)
+    assert np.isclose(c_irene, 0.01, atol=0.01)

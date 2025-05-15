@@ -4,9 +4,9 @@
 #include <time.h>
 
 // Constantes
-#define N 200    // Tamaño de la red (N x N)
-#define ITERACIONES 100*N^2 // Número de iteraciones
-#define T 3.0 
+#define N 10    // Tamaño de la red (N x N)
+#define ITERACIONES 1000*N^2 // Número de iteraciones
+#define T 1.5
 #define K_BOLTZMANN 1.0 // Constante de Boltzmann (J/K)
 
 // Función para inicializar la red con espines aleatorios (+1 o -1)
@@ -185,15 +185,17 @@ void monteCarloIsing(int red[N][N], double beta, int iteraciones,double energias
             // Guardar la red en el archivo si se acepta el cambio
             guardarRed(archivo, red);
 
-            // Calcular la energía total del sistema y guardarla en el array
-         energia_actual = calcularEnergia(red);
-         energias[energia_index++] = energia_actual;
+         // Calcular la energía total del sistema y guardarla en el array
+        
+            energia_actual = calcularEnergia(red);
+            energias[energia_index++] = energia_actual;
+        
 
             // Verificar la convergencia solo si se acepta el cambio
-            if (fabs(energia_actual - energia_anterior) < umbral_convergencia) {
-             printf("Convergencia alcanzada en la iteración %d.\n", i + 1);
-             break;
-             }
+            //if (fabs(energia_actual - energia_anterior) < umbral_convergencia) {
+             //printf("Convergencia alcanzada en la iteración %d.\n", i + 1);
+             //break;
+            // }
             
 
         }
@@ -214,6 +216,22 @@ void imprimirRed(int red[N][N]) {
         printf("\n");
     }
 }
+
+void guardarEnergias(const char *nombre_archivo, double energias[], int num_energias) {
+    FILE *archivo = fopen(nombre_archivo, "w");
+    if (archivo == NULL) {
+        fprintf(stderr, "Error al abrir el archivo para guardar las energías.\n");
+        exit(1);
+    }
+
+    for (int i = 0; i < num_energias; i++) {
+        fprintf(archivo, "%.6f\n", i, energias[i]); // Guardar cada energía con 6 decimales
+    }
+
+    fclose(archivo);
+
+}
+
 
 int main() {
 
@@ -266,6 +284,8 @@ int main() {
     // Imprimir la configuración final
     printf("\nConfiguración final de la red:\n");
     imprimirRed(red);
+
+    guardarEnergias("energias.txt", energias, ITERACIONES);
 
      // Medir el tiempo de finalización
      clock_t fin = clock();

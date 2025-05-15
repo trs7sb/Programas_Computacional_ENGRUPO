@@ -4,9 +4,9 @@
 #include <time.h>
 
 // Constantes
-#define N 200    // Tamaño de la red (N x N)
-#define ITERACIONES 100*N^2 // Número de iteraciones
-#define T 3.0 
+#define N 10    // Tamaño de la red (N x N)
+#define ITERACIONES 1000*N^2 // Número de iteraciones
+#define T 1.0 
 #define K_BOLTZMANN 1.0 // Constante de Boltzmann (J/K)
 
 // Función para inicializar la red con espines aleatorios (+1 o -1)
@@ -118,17 +118,24 @@ void calcularCalorEspecifico(double energias[], int num_energias, double *cv) {
 }
 
 // Algoritmo de Monte Carlo para el modelo de Ising
-void monteCarloIsing(int red[N][N], double beta, int iteraciones,double energias[]) {
+void monteCarloIsing(int red[N][N], double beta, int iteraciones) {
     int i, n, m, suma_vecinos;
-    double deltaE, probabilidad, r;
-    int energia_index = 0;
-    double energia_anterior=0.0; // Para almacenar la energía de la iteración anterior
-    double energia_actual=0.0; // Para almacenar la energía de la iteración actual
+    double deltaE, probabilidad,r;
+    double energia_anterior = calcularEnergia(red); // Inicializar con la energía inicial
+    double energia_actual = energia_anterior;      // Inicializar con la misma energía
     double umbral_convergencia = 1e-6; // Umbral para determinar la convergencia
 
-    FILE *archivo = fopen("matriz_red.txt", "w");
-    if (archivo == NULL) {
+    FILE *archivo_red = fopen("matriz_red.txt", "w");
+    if (archivo_red == NULL) {
         fprintf(stderr, "Error al abrir el archivo para guardar la red.\n");
+        exit(1);
+    }
+
+    
+    FILE *archivo_energias = fopen("energias.txt", "w");
+    if (archivo_energias == NULL) {
+        fprintf(stderr, "Error al abrir el archivo para guardar las energías.\n");
+        fclose(archivo_red);
         exit(1);
     }
 
@@ -183,27 +190,29 @@ void monteCarloIsing(int red[N][N], double beta, int iteraciones,double energias
         if (r < probabilidad) {
             red[n][m] *= -1; // Si se acepta el cambio, invertir el signo del espín
             // Guardar la red en el archivo si se acepta el cambio
-            guardarRed(archivo, red);
+            guardarRed(archivo_red, red);
 
          // Calcular la energía total del sistema y guardarla en el array
         
             energia_actual = calcularEnergia(red);
-            energias[energia_index++] = energia_actual;
+            // Guardar la energía en el archivo
+            fprintf(archivo_energias, "%d %.6f\n", i, energia_actual);
         
 
-            // Verificar la convergencia solo si se acepta el cambio
-            //if (fabs(energia_actual - energia_anterior) < umbral_convergencia) {
-             //printf("Convergencia alcanzada en la iteración %d.\n", i + 1);
-             //break;
-            // }
-            
-
+            // Verificar la convergencia solo si se acepta el cambio en N pasos montecarlo 
+            if (i % N*N == 0) {
+             if (fabs(energia_actual - energia_anterior) < umbral_convergencia) {
+                     printf("Convergencia alcanzada en la iteración %d.\n", i + 1);
+                    // Exit the loop because convergence has been reached
+                        break;
+             }   
+            } 
+            energia_anterior = energia_actual;  
         }
-        energia_anterior = energia_actual;
         
     }
-
-    fclose(archivo);
+    fclose(archivo_red);
+    fclose(archivo_energias);
 }
 
 // Función para imprimir la red
@@ -215,21 +224,6 @@ void imprimirRed(int red[N][N]) {
         }
         printf("\n");
     }
-}
-
-void guardarEnergias(const char *nombre_archivo, double energias[], int num_energias) {
-    FILE *archivo = fopen(nombre_archivo, "w");
-    if (archivo == NULL) {
-        fprintf(stderr, "Error al abrir el archivo para guardar las energías.\n");
-        exit(1);
-    }
-
-    for (int i = 0; i < num_energias; i++) {
-        fprintf(archivo, "%.6f\n", i, energias[i]); // Guardar cada energía con 6 decimales
-    }
-
-    fclose(archivo);
-
 }
 
 
@@ -244,9 +238,7 @@ int main() {
 
     int red[N][N];
     int opcion, sesgo;
-
-        // Array para almacenar las energías
-        double energias[ITERACIONES] = {0};
+      
 
     // Solicitar al usuario cómo inicializar la red
     printf("Seleccione cómo inicializar la red:\n");
@@ -279,13 +271,13 @@ int main() {
     imprimirRed(red);
 
     // Ejecutar el algoritmo de Monte Carlo
-    monteCarloIsing(red, beta, ITERACIONES,energias);
+    monteCarloIsing(red, beta, ITERACIONES);
 
     // Imprimir la configuración final
     printf("\nConfiguración final de la red:\n");
     imprimirRed(red);
 
-    guardarEnergias("energias.txt", energias, ITERACIONES);
+
 
      // Medir el tiempo de finalización
      clock_t fin = clock();

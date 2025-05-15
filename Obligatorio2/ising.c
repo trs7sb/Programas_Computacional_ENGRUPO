@@ -4,21 +4,9 @@
 #include <time.h>
 
 // Constantes
-<<<<<<< HEAD
-#define N 200 // Tamaño de la red (N x N)
-#define ITERACIONES 100*N^2 // Número de iteraciones
-#define T 1.5
-=======
-<<<<<<< HEAD
-#define N 10         // Tamaño de la red (N x N)
-#define ITERACIONES 10000// Número de iteraciones
-#define T 1.5//T_c=2.0 / log(1.0 + sqrt(2.0))
-=======
 #define N 200    // Tamaño de la red (N x N)
 #define ITERACIONES 100*N^2 // Número de iteraciones
 #define T 3.0 
->>>>>>> bd25ce9801706c8d60fa55d84c2754f551a3afc5
->>>>>>> a629e3d48789e5a0266b0dc2f9654f8b648760d1
 #define K_BOLTZMANN 1.0 // Constante de Boltzmann (J/K)
 
 // Función para inicializar la red con espines aleatorios (+1 o -1)
@@ -135,7 +123,7 @@ void monteCarloIsing(int red[N][N], double beta, int iteraciones,double energias
     double deltaE, probabilidad, r;
     int energia_index = 0;
     double energia_anterior=0.0; // Para almacenar la energía de la iteración anterior
-    double energia_actual; // Para almacenar la energía de la iteración actual
+    double energia_actual=0.0; // Para almacenar la energía de la iteración actual
     double umbral_convergencia = 1e-6; // Umbral para determinar la convergencia
 
     FILE *archivo = fopen("matriz_red.txt", "w");
@@ -194,41 +182,24 @@ void monteCarloIsing(int red[N][N], double beta, int iteraciones,double energias
         r = (double)rand() / RAND_MAX;
         if (r < probabilidad) {
             red[n][m] *= -1; // Si se acepta el cambio, invertir el signo del espín
-<<<<<<< HEAD
-
-            // Calcular la energía total del sistema y guardarla en el array
-            energia_index++;
-            energias[energia_index] = calcularEnergia(red);
-            energia_actual=energias[energia_index]; 
-
-            // Guardar la red en el archivo después de cada iteración
-              guardarRed(archivo, red);
-
-               // Verificar la convergencia
-             if (fabs(energia_actual - energia_anterior) < umbral_convergencia) {
-                 printf("Convergencia alcanzada en la iteración %d.\n", i + 1);
-                break;
-             }
-
-            energia_anterior = energia_actual;
-        }
-
-        /*
-        Para que el algoritmo de Ising salga del bucle for cuando converja, 
-        agregamos una condición de parada basada en la estabilidad de la energía del sistema. 
-        Esto implica verificar si la energía total del sistema no cambia significativamente entre iteraciones consecutivas. 
-        Si la diferencia entre las energías de dos iteraciones consecutivas es menor que un umbral definido (por ejemplo, 1e-6), 
-        se puede considerar que el sistema ha convergido.
-        */
-=======
             // Guardar la red en el archivo si se acepta el cambio
             guardarRed(archivo, red);
-        }
 
->>>>>>> bd25ce9801706c8d60fa55d84c2754f551a3afc5
+            // Calcular la energía total del sistema y guardarla en el array
+         energia_actual = calcularEnergia(red);
+         energias[energia_index++] = energia_actual;
+
+            // Verificar la convergencia solo si se acepta el cambio
+            if (fabs(energia_actual - energia_anterior) < umbral_convergencia) {
+             printf("Convergencia alcanzada en la iteración %d.\n", i + 1);
+             break;
+             }
+            
+
+        }
+        energia_anterior = energia_actual;
         
     }
-
 
     fclose(archivo);
 }
@@ -296,35 +267,10 @@ int main() {
     printf("\nConfiguración final de la red:\n");
     imprimirRed(red);
 
-<<<<<<< HEAD
-    FILE *archivo_energias = fopen("energias_vs_iteraciones.txt", "w");
-    if (archivo_energias == NULL) {
-        fprintf(stderr, "Error al abrir el archivo para guardar las energías.\n");
-        exit(1);
-    }
-    
-    int num_energias = 0;
-    for (int i = 0; i < ITERACIONES&& energias[i] != 0; i++) {
-        num_energias++;
-        fprintf(archivo_energias, "%d %.2f\n", i + 1, energias[i]); // Iteración y energía
-    }
-
-    // Calcular el calor específico
-    double cv = 0.0;
-    calcularCalorEspecifico(energias, num_energias, &cv);
-
-    // Imprimir el resultado
-    printf("Calor específico a volumen constante (C_V): %.5f\n", cv);
-
-    fclose(archivo_energias);
-
-  
-=======
      // Medir el tiempo de finalización
      clock_t fin = clock();
      double tiempo = (double)(fin - inicio) / CLOCKS_PER_SEC;
      printf("\nTiempo de ejecución: %.2f segundos.\n", tiempo);
->>>>>>> bd25ce9801706c8d60fa55d84c2754f551a3afc5
 
     return 0;
 }

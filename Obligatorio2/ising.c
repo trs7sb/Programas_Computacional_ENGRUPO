@@ -4,9 +4,9 @@
 #include <time.h>
 
 // Constantes
-#define N 200    // Tamaño de la red (N x N)
-#define ITERACIONES 100*N^2 // Número de iteraciones
-#define T 3.0 
+#define N 10    // Tamaño de la red (N x N)
+#define ITERACIONES 1000*N^2 // Número de iteraciones
+#define T 1.5 
 #define K_BOLTZMANN 1.0 // Constante de Boltzmann (J/K)
 
 // Función para inicializar la red con espines aleatorios (+1 o -1)
@@ -225,7 +225,7 @@ void guardarEnergias(const char *nombre_archivo, double energias[], int num_ener
     }
 
     for (int i = 0; i < num_energias; i++) {
-        fprintf(archivo, "%.6f\n", i, energias[i]); // Guardar cada energía con 6 decimales
+        fprintf(archivo, "%d %.6f\n", i, energias[i]); // Guardar cada energía con 6 decimales
     }
 
     fclose(archivo);

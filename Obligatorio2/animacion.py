@@ -48,9 +48,9 @@ import io
 # Parámetros
 # ========================================
 file_in = "matriz_red.txt" # Nombre del fichero de datos
-file_out = "animacion_ising" # Nombre del fichero de salida (sin extensión)
-interval = 1e-10 # Tiempo entre fotogramas en milisegundos
-save_to_file = False # False: muestra la animación por pantalla,
+file_out = "animacion_ising. N=100.P1" # Nombre del fichero de salida (sin extensión)
+interval = 10 # Tiempo entre fotogramas en milisegundos
+save_to_file = True # False: muestra la animación por pantalla,
                      # True: la guarda en un fichero
 dpi = 150 # Calidad del vídeo de salida (dots per inch)
 

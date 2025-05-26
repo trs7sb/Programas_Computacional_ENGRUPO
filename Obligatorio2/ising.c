@@ -4,14 +4,10 @@
 #include <time.h>
 
 // Constantes
-#define N 10    // Tamaño de la red (N x N)
-#define ITERACIONES 1000*N^2 // Número de iteraciones
-<<<<<<< HEAD
-#define T 1.5 
-=======
-#define T 1.0 
->>>>>>> 26b9b05be1834c07dea13fc06e13b7f50691904b
-#define K_BOLTZMANN 1.0 // Constante de Boltzmann (J/K)
+#define N 100// Tamaño de la red (N x N)
+#define pasosmontecarlo 10000 
+#define T 0.01
+#define K_BOLTZMANN 2.0 // Constante de Boltzmann (J/K)
 
 // Función para inicializar la red con espines aleatorios (+1 o -1)
 void inicializarRed(int red[N][N], int sesgo) {
@@ -61,37 +57,36 @@ double calcularEnergia(int red[N][N]) {
     int i, j;
     int arriba, abajo, izquierda, derecha;
 
-
     for (i = 0; i < N; i++) {
         for (j = 0; j < N; j++) {
             // Condiciones de contorno periódicas
             // Vecino de arriba
-        if (i == 0) {
-            arriba = red[N - 1][j]; // Si está en el borde superior, conecta con el último
-        } else {
-            arriba = red[i - 1][j];
-        }
+            if (i == 0) {
+                arriba = red[N - 1][j]; // Si está en el borde superior, conecta con el último
+            } else {
+                arriba = red[i - 1][j];
+            }
 
-        // Vecino de abajo
-        if (i == N - 1) {
-            abajo = red[0][j]; // Si está en el borde inferior, conecta con el primero
-        } else {
-            abajo = red[i + 1][j];
-        }
+            // Vecino de abajo
+            if (i == N - 1) {
+                abajo = red[0][j]; // Si está en el borde inferior, conecta con el primero
+            } else {
+                abajo = red[i + 1][j];
+            }
 
-        // Vecino de la izquierda
-        if (j == 0) {
-            izquierda = red[i][N - 1]; // Si está en el borde izquierdo, conecta con el último
-        } else {
-            izquierda = red[i][j - 1];
-        }
+            // Vecino de la izquierda
+            if (j == 0) {
+                izquierda = red[i][N - 1]; // Si está en el borde izquierdo, conecta con el último
+            } else {
+                izquierda = red[i][j - 1];
+            }
 
-        // Vecino de la derecha
-        if (j == N - 1) {
-            derecha = red[i][0]; // Si está en el borde derecho, conecta con el primero
-        } else {
-            derecha = red[i][j + 1];
-        }
+            // Vecino de la derecha
+            if (j == N - 1) {
+                derecha = red[i][0]; // Si está en el borde derecho, conecta con el primero
+            } else {
+                derecha = red[i][j + 1];
+            }
 
             // Sumar las interacciones con los vecinos
             energia += red[i][j] * (arriba + abajo + izquierda + derecha);
@@ -100,34 +95,18 @@ double calcularEnergia(int red[N][N]) {
     return -energia / 2.0; // Dividir entre 2 para evitar contar interacciones duplicadas
 }
 
-void calcularCalorEspecifico(double energias[], int num_energias, double *cv) {
-    double suma_E = 0.0, suma_E2 = 0.0;
-    int i;
-
-    // Calcular la suma de las energías y la suma de los cuadrados de las energías
-    for (i = 0; i < num_energias; i++) {
-        suma_E += energias[i];
-        suma_E2 += energias[i] * energias[i];
-    }
-
-      // Calcular los promedios
-      double promedio_E = suma_E / num_energias;
-      double promedio_E2 = suma_E2 / num_energias;
-  
-      // Calcular la varianza
-      double varianza_E = promedio_E2 - (promedio_E * promedio_E);
-  
-      // Calcular el calor específico a volumen constante
-      *cv = varianza_E / (N*N*T);
-}
 
 // Algoritmo de Monte Carlo para el modelo de Ising
-void monteCarloIsing(int red[N][N], double beta, int iteraciones) {
-    int i, n, m, suma_vecinos;
-    double deltaE, probabilidad,r;
-    double energia_anterior = calcularEnergia(red); // Inicializar con la energía inicial
-    double energia_actual = energia_anterior;      // Inicializar con la misma energía
-    double umbral_convergencia = 1e-6; // Umbral para determinar la convergencia
+void monteCarloIsing(int red[N][N], double beta) {
+    int i, j, n, m, suma_vecinos;
+    double deltaE, probabilidad, r;
+    double energia_actual;
+
+    // Array circular para almacenar las últimas 6 energías
+    double energias[1000] = {0};
+    for (int k = 0; k < 1000; k++) {
+        energias[k] = calcularEnergia(red);
+    }
 
     FILE *archivo_red = fopen("matriz_red.txt", "w");
     if (archivo_red == NULL) {
@@ -135,7 +114,6 @@ void monteCarloIsing(int red[N][N], double beta, int iteraciones) {
         exit(1);
     }
 
-    
     FILE *archivo_energias = fopen("energias.txt", "w");
     if (archivo_energias == NULL) {
         fprintf(stderr, "Error al abrir el archivo para guardar las energías.\n");
@@ -143,78 +121,84 @@ void monteCarloIsing(int red[N][N], double beta, int iteraciones) {
         exit(1);
     }
 
-    for (i = 0; i < iteraciones; i++) {
-        // Elegir un espín aleatorio en la red
-        n = rand() % N;
-        m = rand() % N;
-
-        // Calcular los vecinos con condiciones de contorno periódicas
-        int arriba, abajo, izquierda, derecha;
-
-        // Vecino de arriba
-        if (n == 0) {
-            arriba = red[N - 1][m]; // Si está en el borde superior, conecta con el último
-        } else {
-            arriba = red[n - 1][m];
-        }
-
-        // Vecino de abajo
-        if (n == N - 1) {
-            abajo = red[0][m]; // Si está en el borde inferior, conecta con el primero
-        } else {
-            abajo = red[n + 1][m];
-        }
-
-        // Vecino de la izquierda
-        if (m == 0) {
-            izquierda = red[n][N - 1]; // Si está en el borde izquierdo, conecta con el último
-        } else {
-            izquierda = red[n][m - 1];
-        }
-
-        // Vecino de la derecha
-        if (m == N - 1) {
-            derecha = red[n][0]; // Si está en el borde derecho, conecta con el primero
-        } else {
-            derecha = red[n][m + 1];
-        }
-
-        // Calcular el cambio de energía cuando se invierte el espín
-        suma_vecinos = arriba + abajo + izquierda + derecha;
-        deltaE = 2 * red[n][m] * suma_vecinos;
-
-        // Calcular la probabilidad de transición
-        probabilidad = exp(-beta * deltaE);
-        if (probabilidad > 1.0) {
-            probabilidad = 1.0;
-        }
-
-        // Generar un número aleatorio con probabilidad uniforme entre 0 y 1 para decidir si aceptar el cambio
-        r = (double)rand() / RAND_MAX;
-        if (r < probabilidad) {
-            red[n][m] *= -1; // Si se acepta el cambio, invertir el signo del espín
-            // Guardar la red en el archivo si se acepta el cambio
+    for (i = 0; i < pasosmontecarlo; i++) {
+        if (i==0){
             guardarRed(archivo_red, red);
-
-         // Calcular la energía total del sistema y guardarla en el array
-        
-            energia_actual = calcularEnergia(red);
-            // Guardar la energía en el archivo
-            fprintf(archivo_energias, "%d %.6f\n", i, energia_actual);
-        
-
-            // Verificar la convergencia solo si se acepta el cambio en N pasos montecarlo 
-            if (i % N*N == 0) {
-             if (fabs(energia_actual - energia_anterior) < umbral_convergencia) {
-                     printf("Convergencia alcanzada en la iteración %d.\n", i + 1);
-                    // Exit the loop because convergence has been reached
-                        break;
-             }   
-            } 
-            energia_anterior = energia_actual;  
         }
-        
+
+        for (int j = 0; j < N * N; j++) {
+            // Elegir un espín aleatorio en la red
+            n = rand() % N;
+            m = rand() % N;
+
+            // Calcular los vecinos con condiciones de contorno periódicas
+            int arriba, abajo, izquierda, derecha;
+
+            // Vecino de arriba
+            if (n == 0) {
+                arriba = red[N - 1][m];
+            } else {
+                arriba = red[n - 1][m];
+            }
+
+            // Vecino de abajo
+            if (n == N - 1) {
+                abajo = red[0][m];
+            } else {
+                abajo = red[n + 1][m];
+            }
+
+            // Vecino de la izquierda
+            if (m == 0) {
+                izquierda = red[n][N - 1];
+            } else {
+                izquierda = red[n][m - 1];
+            }
+
+            // Vecino de la derecha
+            if (m == N - 1) {
+                derecha = red[n][0];
+            } else {
+                derecha = red[n][m + 1];
+            }
+
+            // Calcular el cambio de energía cuando se invierte el espín
+            suma_vecinos = arriba + abajo + izquierda + derecha;
+            deltaE = 2 * red[n][m] * suma_vecinos;
+
+            // Calcular la probabilidad de transición
+            probabilidad = exp(-beta * deltaE);
+            if (probabilidad > 1.0) {
+                probabilidad = 1.0;
+            }
+
+            // Generar un número aleatorio con probabilidad uniforme entre 0 y 1 para decidir si aceptar el cambio
+            r = (double)rand() / RAND_MAX;
+
+            if (r < probabilidad) {
+                red[n][m] *= -1; // Si se acepta el cambio, invertir el signo del espín
+            }
+        }
+
+        // Guardar la red en el fichero cada paso montecarlo
+        guardarRed(archivo_red, red);
+
+        energia_actual = calcularEnergia(red);
+
+        // Guardar la energía en el archivo
+        fprintf(archivo_energias, "%d %.6f\n", i, energia_actual);
+
+        // Verificar convergencia: comparar energía actual con la de 10 pasos antes
+        if (i >= 1000) {
+            if (fabs(energia_actual - energias[i % 1000]) < 2) {
+                printf("Convergencia alcanzada en el paso montecarlo %d.\n", i);
+                break;
+            }
+        }
+        // Guardar la energía en el array circular
+         energias[i % 1000] = energia_actual;
     }
+
     fclose(archivo_red);
     fclose(archivo_energias);
 }
@@ -230,42 +214,20 @@ void imprimirRed(int red[N][N]) {
     }
 }
 
-<<<<<<< HEAD
-void guardarEnergias(const char *nombre_archivo, double energias[], int num_energias) {
-    FILE *archivo = fopen(nombre_archivo, "w");
-    if (archivo == NULL) {
-        fprintf(stderr, "Error al abrir el archivo para guardar las energías.\n");
-        exit(1);
-    }
-
-    for (int i = 0; i < num_energias; i++) {
-        fprintf(archivo, "%d %.6f\n", i, energias[i]); // Guardar cada energía con 6 decimales
-    }
-
-    fclose(archivo);
-
-}
-
-=======
->>>>>>> 26b9b05be1834c07dea13fc06e13b7f50691904b
-
 int main() {
-
     // Medir el tiempo de inicio
-
     double beta = 1.0 / (K_BOLTZMANN * T); // Beta = 1 / (k_B * T)
 
     // Inicializa la semilla de números aleatorios
     srand(time(NULL));
 
     int red[N][N];
-    int opcion, sesgo;
-      
+    int opcion;
 
     // Solicitar al usuario cómo inicializar la red
     printf("Seleccione cómo inicializar la red:\n");
     printf("1. Aleatoria\n");
-    printf("2. Con sesgo de espines paralelos o antiparalelos\n");
+    printf("2. Ordenada (+1)\n");
     printf("Ingrese su opción (1 o 2): ");
     scanf("%d", &opcion);
 
@@ -273,14 +235,8 @@ int main() {
         // Inicializar la red de forma completamente aleatoria
         inicializarRed(red, 50); // 50% de probabilidad para +1 o -1
     } else if (opcion == 2) {
-        // Solicitar el porcentaje de sesgo
-        printf("Ingrese el porcentaje de sesgo para espines paralelos (0-100): ");
-        scanf("%d", &sesgo);
-        if (sesgo < 0 || sesgo > 100) {
-            printf("Porcentaje inválido. Usando 50%% por defecto.\n");
-            sesgo = 50;
-        }
-        inicializarRed(red, sesgo);
+        // Inicializar la red de forma ordenada (+1)
+        inicializarRedOrdenada(red, 50);
     } else {
         printf("Opción no válida. Inicializando de forma aleatoria por defecto.\n");
         inicializarRed(red, 50);
@@ -293,18 +249,16 @@ int main() {
     imprimirRed(red);
 
     // Ejecutar el algoritmo de Monte Carlo
-    monteCarloIsing(red, beta, ITERACIONES);
+    monteCarloIsing(red, beta);
 
     // Imprimir la configuración final
     printf("\nConfiguración final de la red:\n");
     imprimirRed(red);
 
-
-
-     // Medir el tiempo de finalización
-     clock_t fin = clock();
-     double tiempo = (double)(fin - inicio) / CLOCKS_PER_SEC;
-     printf("\nTiempo de ejecución: %.2f segundos.\n", tiempo);
+    // Medir el tiempo de finalización
+    clock_t fin = clock();
+    double tiempo = (double)(fin - inicio) / CLOCKS_PER_SEC;
+    printf("\nTiempo de ejecución: %.2f segundos.\n", tiempo);
 
     return 0;
 }

@@ -4,9 +4,9 @@
 #include <time.h>
 
 // Constantes
-#define N 64// Tamaño de la red (N x N)
-#define pasosmontecarlo 10000 
-#define T 1.0
+#define N 200 // Tamaño de la red (N x N)
+#define pasosmontecarlo 100 
+#define T 3.0
 #define K_BOLTZMANN 1.0 // Constante de Boltzmann (J/K)
 
 // Función para inicializar la red con espines aleatorios (+1 o -1)
